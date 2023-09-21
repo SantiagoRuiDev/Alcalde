@@ -14,7 +14,7 @@
       <div class="list-group mt-4">
         <a
           :href="'/res/ver/' + coche.resena_id"
-          class="row list-group-item list-group-item-action flex-column align-items-start"
+          class="row list-group-item list-group-item-action flex-column align-items-start mx-auto"
           v-for="coche in coches"
           :key="coche.id"
         >

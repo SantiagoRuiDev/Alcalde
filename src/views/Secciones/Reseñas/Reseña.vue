@@ -4,6 +4,7 @@ export default {
         return {
             resenas: [],
             URL: "http://localhost:3000/api/resenas/",
+            URL_CALIFICAR: "http://localhost:3000/api/calificaciones/crear",
             loading: true,
             detalles: []
         }
@@ -12,7 +13,7 @@ export default {
     created: function () { this.getResena() },
 
     methods: {
-        getResena(){
+        getResena () {
             this.axios.get(this.URL + this.$route.params.id, {
                 headers: {
                     'x-access-token': this.$store.getters.getUserToken
@@ -23,6 +24,29 @@ export default {
             }).catch(err => {
                 console.log(err)
             }) 
+        },
+        
+        calificarResena (id, caf) {
+            let data = {id_resena: id, calificacion: caf};
+            this.axios.post(this.URL_CALIFICAR, data, {
+                headers: {
+                    'x-access-token': this.$store.getters.getUserToken
+                }
+            }).then(response => {
+                this.$swal.fire({
+                    icon: 'success',
+                    title: response.data.message,
+                    showConfirmButton: false,
+                    timer: 1500
+                })
+            }).catch(err => {
+                this.$swal.fire({
+                    icon: 'error',
+                    title: err.response.data.error,
+                    showConfirmButton: false,
+                    timer: 1500
+                })
+            })
         }
     }
 }
@@ -42,8 +66,22 @@ export default {
                 <div class="card mx-auto" v-for="resena in resenas" :key="resena.id">
                     <img :src="resena.imagen">
                     <div class="card-body pt-0 px-0">
-                        <div class="d-flex flex-row justify-content-center mt-3 px-3">
+                        <div class="d-flex flex-column text-center justify-content-center mt-3 px-3">
                             <small class="mt-1 fs-6 fw-bold text-center">{{resena.titulo}}</small>
+                            <p>{{ resena.descripcion }}</p>
+
+                            <div class="rate">
+                                <input type="radio" id="star5" name="rate" value="5" v-on:click="calificarResena(resena.id, 5)" />
+                                <label for="star5" title="text">5 stars</label>
+                                <input type="radio" id="star4" name="rate" value="4" v-on:click="calificarResena(resena.id, 4)" />
+                                <label for="star4" title="text">4 stars</label>
+                                <input type="radio" id="star3" name="rate" value="3" v-on:click="calificarResena(resena.id, 3)" />
+                                <label for="star3" title="text">3 stars</label>
+                                <input type="radio" id="star2" name="rate" value="2" v-on:click="calificarResena(resena.id, 2)" />
+                                <label for="star2" title="text">2 stars</label>
+                                <input type="radio" id="star1" name="rate" value="1" v-on:click="calificarResena(resena.id, 1)" />
+                                <label for="star1" title="text">1 star</label>
+                            </div>
                         </div>
                         <hr class="mt-2 mx-3">
                         
@@ -100,6 +138,42 @@ export default {
 </template>
 
 <style scoped>
+
+.rate {
+    float: left;
+    height: 46px;
+    padding: 0 10px;
+}
+.rate:not(:checked) > input {
+    position:absolute;
+    top:-9999px;
+}
+.rate:not(:checked) > label {
+    width:1em;
+    overflow:hidden;
+    white-space:nowrap;
+    cursor:pointer;
+    font-size:30px;
+    color:#ccc;
+}
+.rate:not(:checked) > label:before {
+    content: '★ ';
+}
+.rate > input:checked ~ label {
+    color: #ffc700;    
+}
+.rate:not(:checked) > label:hover,
+.rate:not(:checked) > label:hover ~ label {
+    color: #deb217;  
+}
+.rate > input:checked + label:hover,
+.rate > input:checked + label:hover ~ label,
+.rate > input:checked ~ label:hover,
+.rate > input:checked ~ label:hover ~ label,
+.rate > label:hover ~ input:checked ~ label {
+    color: #c59b08;
+}
+
 .card{
 	width: 80%;
 	border-radius: 10px;

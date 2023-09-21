@@ -34,6 +34,12 @@ import Articulo from '../views/Secciones/Articulos/Articulo.vue'
 import VerArticulos from '../views/Secciones/Articulos/VerArticulos.vue'
 import CrearArticulo from '../views/Secciones/Articulos/CrearArticulo.vue'
 
+// Versus Componentes
+import Versus from '../views/Secciones/Versus/Versus.vue'
+import VerVersus from '../views/Secciones/Versus/VerVersus.vue'
+import CrearVersus from '../views/Secciones/Versus/CrearVersus.vue'
+
+
 // Componentes de Sesionado
 import Login from '../views/Sesion/Login.vue'
 import Register from '../views/Sesion/Register.vue'
@@ -143,6 +149,24 @@ const router = createRouter({
       path: '/listas/crear',
       name: 'listacrear',
       component: CrearLista,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/versus',
+      name: 'versus',
+      component: Versus,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/versus/crear',
+      name: 'crearversus',
+      component: CrearVersus,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/versus/:id',
+      name: 'verversus',
+      component: VerVersus,
       meta: { requiresAuth: true }
     },
     {

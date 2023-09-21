@@ -7,9 +7,13 @@ export default {
             resenas: [],
             data: new FormData(),
             selectedFile: null,
+            resenasLista: [],
+            listaPreview: false,
             param: "",
             lista: {},
             URL_BUSCAR: "http://localhost:3000/api/resenas/buscar/",
+            URL_INFO: "http://localhost:3000/api/resenas/info/",
+            URL_CREAR: "http://localhost:3000/api/listas/crear/"
         }
     },
 
@@ -40,7 +44,7 @@ export default {
 
             if(this.lista.titulo.trim() == '' || this.lista.subtitulo.trim() == ''|| this.selectedFile == null || this.resenas == []) return this.$swal.fire('Error', 'Ingrese todos los campos', 'error');
            
-            this.axios.post('http://localhost:3000/api/listas/crear', this.data, {
+            this.axios.post(this.URL_CREAR, this.data, {
                 headers: {
                     'x-access-token': this.$store.getters.getUserToken
                 }
@@ -51,10 +55,13 @@ export default {
             });
         },
         addToList(id){
+            const find = this.resenas.some((resena) => resena == id);
+            if(find) return this.$swal.fire('Error', 'Ya añadiste esta reseña', 'error');
             this.resenas.push(id);
             this.resultado = false;
             this.param = "";
 
+            this.cargarResenas();
             const Toast = this.$swal.mixin({
                 toast: true,
                 position: 'top-end',
@@ -62,8 +69,8 @@ export default {
                 timer: 3000,
                 timerProgressBar: true,
                 didOpen: (toast) => {
-                  toast.addEventListener('mouseenter', Swal.stopTimer)
-                  toast.addEventListener('mouseleave', Swal.resumeTimer)
+                  toast.addEventListener('mouseenter', this.$swal.stopTimer)
+                  toast.addEventListener('mouseleave', this.$swal.resumeTimer)
                 }
               })
 
@@ -71,13 +78,39 @@ export default {
                 icon: 'success',
                 title: 'Coche añadido a la lista'
               })
+        },
+
+        cargarResenas(){
+          this.resenasLista = [];
+          this.resenas.forEach((resena) => {
+            this.axios.get(this.URL_INFO + resena, {
+              headers: {
+                  'x-access-token': this.$store.getters.getUserToken
+              }}).then(response => {
+                 this.resenasLista.push(response.data[0]);
+                }).catch(error => {
+                  this.$swal.fire('Error', error.response.data.error, 'error');
+                });
+            });
+
+            this.listaPreview = true;
+        },
+
+        removerItemLista(id) {
+          this.resenasLista = this.resenasLista.filter((resena) => resena.id != id);
+          this.resenas = this.resenas.filter((resena) => resena != id);
+
+          this.$swal.fire('Item Eliminado', 'Eliminado correctamente', 'success');
         }
     }
 }
 </script>
 
 <template>
-    <div class="container">
+
+<div class="main-container d-grid align-items-center gap-3">
+  
+  <div class="container">
         <div class="row justify-content-center align-items-center">
           <div class="col-md-6">
             <div class="card">
@@ -128,6 +161,41 @@ export default {
                     <label for="image" class="form-label">Sube una imagen</label>
                     <input type="file" class="form-control" name="image" id="image" v-on:change="changeHandler">
                   </div>
+
+
+                        <!--Este contenedor guarda la preview de la lista, significa que puedes eliminar y ver como va quedando la lista.-->
+                        <div class="container" v-if="resenas.length > 0">
+                                <div class="row justify-content-center align-items-center">
+                                  <div class="col">
+                                    <div class="card">
+                                      <div class="card-header text-center">
+                                        <h4>Previsualizacion:</h4>
+                                        <h5>{{ lista.titulo }}</h5>
+                                      </div>
+                                      <div class="card-body">
+
+                                        <div class="card mt-2" v-for="info in resenasLista" :key="info.id">
+                                                    <div class="card-body">
+                                                        <div class="row">
+                                                            <div class="col-md-4 d-grid align-items-center">
+                                                                <img :src="info.imagen" alt="Imagen Resena" class="img-fluid">
+                                                            </div>
+                                                            <div class="col-md-8 text-center mx-auto">
+                                                                <h5>{{ info.titulo }}</h5>
+                                                                <p>{{ info.descripcion }}</p>
+                                                                <button class="btn btn-danger w-100" type="button" v-on:click="removerItemLista(info.id)">Eliminar</button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                        </div>
+
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+
+
                   <button type="submit" class="btn btn-primary btn-block w-100 mt-2">Crear lista</button>
                   <RouterLink to="/listas" class="btn btn-danger btn-block w-100 mt-2">Regresar</RouterLink>
                 </form>
@@ -136,4 +204,8 @@ export default {
           </div>
         </div>
       </div>
+
+      
+</div>
+
 </template>

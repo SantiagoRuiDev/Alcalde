@@ -60,7 +60,7 @@
                         security
                       </span>
                       <h4 class="card-title">Versus</h4>
-                      <RouterLink to="/" class="btn btn-success border rounded-pill w-100 mt-2">Revisar</RouterLink>
+                      <RouterLink to="/versus" class="btn btn-success border rounded-pill w-100 mt-2">Revisar</RouterLink>
                     </div>
                   </div>
                 </div>
