@@ -11,6 +11,11 @@ import Quejas from '../views/Administracion/Quejas.vue'
 import QuejasUsuario from '../views/Secciones/Quejas.vue'
 import Reportes from '../views/Administracion/Reportes.vue'
 
+// Componentes de Foros
+
+import Foros from '../views/Secciones/Foros/Foros.vue'
+import VerForo from '../views/Secciones/Foros/VerForo.vue'
+
 // Componentes de Reseña
 
 import Reseñas from '../views/Secciones/Reseñas/Reseñas.vue'
@@ -25,8 +30,6 @@ import VerLista from '../views/Secciones/Listas/VerLista.vue'
 import ListarListas from '../views/Secciones/Listas/ListarListas.vue'
 import CrearLista from '../views/Secciones/Listas/CrearLista.vue'
 
-// Componentes de Foros
-import Foros from '../views/Secciones/Foros.vue'
 
 // Articulos Componentes
 import Articulos from '../views/Secciones/Articulos/Articulos.vue'
@@ -60,6 +63,18 @@ const router = createRouter({
       name: 'bienvenida',
       component: Bienvenida,
       meta: { requiresAuth: false }
+    },
+    {
+      path: '/foros',
+      name: 'foros',
+      component: Foros,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/foro/ver/:id',
+      name: 'forosver',
+      component: VerForo,
+      meta: { requiresAuth: true }
     },
     {
       path: '/admin/usuarios',
@@ -101,12 +116,6 @@ const router = createRouter({
       path: '/res',
       name: 'reseñas',
       component: Reseñas,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/foros',
-      name: 'foros',
-      component: Foros,
       meta: { requiresAuth: true }
     },
     {

@@ -1,0 +1,191 @@
+<template>
+  
+  <div class="ibox-content forum-container" id="forumContainer">
+    <div class="forum-title">
+      <h3>Foros</h3>
+    </div>
+
+    <div class="forum-item active">
+      <div class="row">
+         <div class="row" v-for="foro in foros" :key="foro.foro_id">
+            <div class="col-md-9">
+              <div class="forum-icon">
+                <i class="fa fa-shield"></i>
+              </div>
+              <RouterLink :to="{ name: 'forosver' , params: {id: foro.foro_id} }" class="forum-item-title forumLink"
+                >{{foro.foro_titulo}}</RouterLink
+              >
+              <div class="forum-sub-title">Autor: {{foro.autor_nombre}}</div>
+            </div>
+            <div class="col-md-1 forum-info" v-on:click="reportarForo(foro.autor_id, foro.foro_id)">
+              <span class="material-symbols-outlined"> warning </span>
+              <div>
+                <small>Reportar</small>
+              </div>
+            </div>
+            <div class="col-md-2 forum-info" v-on:click="eliminarForo(foro.foro_id)">
+              <span class="material-symbols-outlined"> delete </span>
+              <div>
+                <small>Eliminar</small>
+              </div>
+            </div>
+         </div>
+      </div>
+    </div>
+    
+
+    <div class="forum-title text-end">
+      <a
+        class="btn btn-success d-inline-flex align-items-center"
+        href="#" v-on:click="crearForo"
+      >
+        <span class="material-symbols-outlined me-2"> add </span>
+        Nuevo Foro
+      </a>
+    </div>
+  </div>
+
+</template>
+
+
+<script>
+  export default {
+    data(){
+      return {
+        foros: [],
+        URL_CREAR: "http://localhost:3000/api/foros/crear",
+        URL: "http://localhost:3000/api/foros/",
+        URL_DELETE: 'http://localhost:3000/api/foros/eliminar/',
+        URL_REPORT: 'http://localhost:3000/api/reportes/crear/'
+      }
+    },
+    created: function(){
+      this.cargarForos()
+    },
+    methods: {
+      cargarForos(){
+        this.axios.get(this.URL, {
+          headers: {
+            'Content-Type': 'application/json',
+            'x-access-token': this.$store.getters.getUserToken
+          }
+        })
+        .then(response => {
+          this.foros = response.data
+        })
+
+      },
+
+      async crearForo (){
+       const { value: titulo } = await this.$swal.fire({
+          title: 'Ingresar un titulo',
+          input: 'text',
+          inputLabel: 'El titulo del foro',
+          inputPlaceholder: 'Ej: foro de motos'
+        })
+
+        if (titulo) {
+          this.axios.post(this.URL_CREAR, { titulo: titulo }, {
+            headers: {
+              'Content-Type': 'application/json',
+              'x-access-token': this.$store.getters.getUserToken
+            }
+          })
+          .then(response => {
+            this.$swal({
+              icon: 'success',
+              title: response.data.message,
+              showConfirmButton: false,
+              timer: 1500
+            })
+          })
+          .catch(error => {
+            this.$swal({
+              icon: 'error',
+              title: error.response.data.error,
+              showConfirmButton: false,
+              timer: 1500
+            })
+          })
+        }
+          
+      },
+      reportarForo(id, foro){
+        this.$swal.fire({
+          icon: 'warning',
+          title: '¿Quieres reportar este foro?',
+          text: 'Reporta el foro, si tiene contenido indebido o malicioso',
+          confirmButtonText: 'Reportar',
+          confirmButtonColor: '#f1bc90',
+        }).then((result) => {
+          if(result.isConfirmed){
+            let data = {id_usuario: id, id_articulo: 0, id_foro: foro, id_resena: 0 }
+            this.axios.post(this.URL_REPORT, data, {
+              headers: {
+                'x-access-token': this.$store.getters.getUserToken
+              }  
+            }).then((response) => {
+              this.$swal.fire({
+                icon: 'success',
+                title: 'Foro reportado',
+                text: response.data.message,
+                confirmButtonText: 'Aceptar',
+                confirmButtonColor: '#f1bc90',
+              }).then((result) => {
+                if(result.isConfirmed) return this.$router.push({name: 'foros'})
+              })
+            }).catch(error => {
+              this.$swal.fire({
+                icon: 'error',
+                title: 'Error al reportar',
+                text: error.response.data.error,
+                confirmButtonText: 'Aceptar',
+                confirmButtonColor: '#f1bc90',
+              }).then((result) => {
+                if(result.isConfirmed) return location.reload();
+              })
+            })
+          }
+        })
+      },
+      eliminarForo(foro){
+        this.$swal.fire({
+          icon: 'warning',
+          title: '¿Quieres eliminar este foro?',
+          text: 'Solo podras eliminar este foro si eres moderador o admin, no podras rehacer cambios',
+          confirmButtonText: 'Eliminar',
+          confirmButtonColor: '#f1bc90',
+        }).then((result) => {
+          if(result.isConfirmed){
+            this.axios.post(this.URL_DELETE + foro, {}, {
+              headers: {
+                'x-access-token': this.$store.getters.getUserToken
+              }  
+            }).then((response) => {
+              this.$swal.fire({
+                icon: 'success',
+                title: 'Foro eliminado',
+                text: response.data.message,
+                confirmButtonText: 'Aceptar',
+                confirmButtonColor: '#f1bc90',
+              }).then((result) => {
+                if(result.isConfirmed) return location.reload();
+              })
+            }).catch(error => {
+              this.$swal.fire({
+                icon: 'error',
+                title: 'Error al eliminar',
+                text: error.response.data.error,
+                confirmButtonText: 'Aceptar',
+                confirmButtonColor: '#f1bc90',
+              }).then((result) => {
+                if(result.isConfirmed) return location.reload();
+              })
+            })
+          }
+        })
+      }
+    }
+  }
+
+</script>
