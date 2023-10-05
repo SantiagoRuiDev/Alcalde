@@ -37,7 +37,7 @@ export default {
 
     <div class="articulos w-75 mx-auto gap-3">
         <div class="card" v-for="articulo in articulos" :key="articulo.id">
-                <img :src="articulo.imagen" class="card-img-top" alt="...">
+                <img :src="articulo.portada" class="card-img-top" alt="...">
                 <div class="card-body">
                     <h6 class="card-title mb-3">{{ articulo.titulo }}</h6>
                     <p class="card-subtitle mb-2 text-muted">{{ articulo.subtitulo }}</p>

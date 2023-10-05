@@ -41,8 +41,8 @@ export default {
         <Spinner v-if="versus.length == 0"></Spinner>
 
         <div v-if="versus.length > 0">
-            <div class="cards-container" v-for="versus in versus" :key="versus.versus_id">
-                <div class="card">
+            <div class="cards-container">
+                <div class="card" v-for="versus in versus" :key="versus.versus_id">
                     <img class="card-img-top" :src="versus.imagen" alt="Portada Versus">
                     <div class="card-body">
                         <h5 class="card-title text-center">{{ versus.coche1_titulo }} VS {{ versus.coche2_titulo }}</h5>

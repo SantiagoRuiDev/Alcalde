@@ -10,12 +10,19 @@ export default {
     }
   },
   methods: {
-    changeHandler (event){
-      this.selectedFile = event.target.files[0];
+    changeHandler(event) {
+      // Verifica si event.target.files es una instancia de FileList
+      if (event.target.files instanceof FileList) {
+        this.selectedFile = Array.from(event.target.files); // Convierte FileList en un array
+      }
     },
-    createArticulo () {
+
+    createArticulo() {
       let formData = new FormData();
-      formData.append('image', this.selectedFile);
+      if (Array.isArray(this.selectedFile)) {
+        this.selectedFile.forEach(file => {
+          formData.append('images', file);
+        })
       formData.append('titulo', this.articulo.titulo);
       formData.append('subtitulo', this.articulo.subtitulo);
       formData.append('descripcion', this.articulo.descripcion);
@@ -51,6 +58,7 @@ export default {
     }
   }
 }
+}
 
 
 </script>
@@ -81,9 +89,10 @@ export default {
                     <textarea class="form-control" name="" id="" rows="3" v-model="articulo.descripcion"></textarea>
                   </div>
                   <div class="mb-3">
-                    <label for="image" class="form-label">Sube una imagen</label>
-                    <input type="file" class="form-control" name="image" id="image" @change="changeHandler">
+                    <label for="image" class="form-label">Sube imagenes</label>
+                    <input type="file" multiple class="form-control" name="image" id="image" @change="changeHandler">
                   </div>
+                  <small>Nota: La ultima imagen seleccionada sera la portada, recuerda tienes un maximo de 5 imagenes</small>
                   <button type="submit" class="btn btn-primary btn-block w-100 mt-2">Crear articulo</button>
                   <RouterLink to="/articulos" class="btn btn-danger btn-block w-100 mt-2">Regresar</RouterLink>
                 </form>

@@ -58,6 +58,7 @@ export default {
             const find = this.resenas.some((resena) => resena == id);
             if(find) return this.$swal.fire('Error', 'Ya añadiste esta reseña', 'error');
             this.resenas.push(id);
+            console.log(this.resenas)
             this.resultado = false;
             this.param = "";
 
@@ -81,17 +82,27 @@ export default {
         },
 
         cargarResenas(){
-          this.resenasLista = [];
-          this.resenas.forEach((resena) => {
-            this.axios.get(this.URL_INFO + resena, {
-              headers: {
-                  'x-access-token': this.$store.getters.getUserToken
-              }}).then(response => {
-                 this.resenasLista.push(response.data[0]);
-                }).catch(error => {
-                  this.$swal.fire('Error', error.response.data.error, 'error');
-                });
-            });
+          Promise.all(
+              this.resenas.map((resena) => {
+                return this.axios.get(this.URL_INFO + resena, {
+                  headers: {
+                    'x-access-token': this.$store.getters.getUserToken
+                  }
+                })
+                  .then(response => {
+                    return response.data[0];
+                  })
+                  .catch(error => {
+                    this.$swal.fire('Error', error.response.data.error, 'error');
+                    // En caso de error, puedes retornar un valor predeterminado o manejarlo según tus necesidades
+                    return null;
+                  });
+              })
+            )
+              .then(resenasDetalladas => {
+                // Una vez que todas las solicitudes se completen, resenasDetalladas contendrá los datos de las reseñas
+                this.resenasLista = resenasDetalladas.filter(resena => resena !== null); // Filtramos cualquier valor nulo en caso de error
+              });
 
             this.listaPreview = true;
         },
