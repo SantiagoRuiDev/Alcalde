@@ -10,6 +10,7 @@ import Usuarios from '../views/Administracion/Usuarios.vue'
 import Quejas from '../views/Administracion/Quejas.vue'
 import QuejasUsuario from '../views/Secciones/Quejas.vue'
 import Reportes from '../views/Administracion/Reportes.vue'
+import Anuncios from '../views/Administracion/Anuncios.vue'
 
 // Componentes de Foros
 
@@ -46,6 +47,7 @@ import CrearVersus from '../views/Secciones/Versus/CrearVersus.vue'
 // Componentes de Sesionado
 import Login from '../views/Sesion/Login.vue'
 import Register from '../views/Sesion/Register.vue'
+import ChangePassword from '../views/Sesion/Change.vue'
 
 import store from '../store/index.js'
 
@@ -63,6 +65,12 @@ const router = createRouter({
       name: 'bienvenida',
       component: Bienvenida,
       meta: { requiresAuth: false }
+    },
+    {
+      path: '/admin/anuncios',
+      name: 'anuncios',
+      component: Anuncios,
+      meta: { requiresAuth: true }
     },
     {
       path: '/foros',
@@ -98,7 +106,7 @@ const router = createRouter({
       path: '/res/listar',
       name: 'reseñaver',
       component: VerReseña,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true}
     },
     {
       path: '/res/crear',
@@ -122,6 +130,12 @@ const router = createRouter({
       path: '/articulos',
       name: 'articulos',
       component: Articulos,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/change/password',
+      name: 'change',
+      component: ChangePassword,
       meta: { requiresAuth: true }
     },
     {
@@ -182,13 +196,13 @@ const router = createRouter({
       path: '/articulo/listar',
       name: 'listararticulos',
       component: VerArticulos,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: false }
     },
     {
       path: '/quejas',
       name: 'quejasysugerencias',
       component: QuejasUsuario,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true}
     },
     {
       path: '/login',
@@ -210,9 +224,24 @@ router.beforeEach((to, from, next) => {
   if (rutaProtegida && !store.getters.isLoggedIn) {
     next({ name: 'login' })
   } else if(!rutaProtegida && store.getters.isLoggedIn) {
-    next({ name: 'inicio' })
+      switch(to.name){
+        case 'login':
+          next({ name: 'inicio' })
+          break;
+        case 'register':
+          next({ name: 'inicio' })
+          break;
+        case 'listararticulos':
+          next()
+          break;
+        case 'bienvenida':
+          next({ name: 'inicio' })
+          break;
+        default:
+          break;
+      }
   } else {
-    next()
+    next();
   }
 })
 

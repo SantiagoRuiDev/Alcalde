@@ -19,7 +19,7 @@
               </div>
 
               
-              <div class="d-grid">
+              <div class="d-flex">
                 <div class="row gap-5 justify-content-center">
                   <div class="card w-25 text-center shadow col-md-4">
                     <div class="card-body">
@@ -39,15 +39,15 @@
                       <p class="card-text">Habla con otras personas acerca de distintos topicos, tambien puedes intercambiar ideas y opiniones</p>
                     </div>
                   </div>
-                  <div class="card w-25 text-center shadow  col-md-4">
-                    <div class="card-body rounded">
-                      <span class="material-symbols-outlined fs-1 mb-3">
-                      article
-                      </span>
-                      <h4 class="card-title">Articulos</h4>
-                      <p class="card-text">Agrega y enterate de las noticias de la industria automovilistica o informacion relevante</p>
-                    </div>
-                  </div>
+                  <RouterLink to="/articulo/listar" class="card w-25 text-center shadow text-decoration-none col-md-4">
+                      <div class="card-body rounded">
+                        <span class="material-symbols-outlined fs-1 mb-3">
+                        article
+                        </span>
+                        <h4 class="card-title">Articulos</h4>
+                        <p class="card-text">Agrega y enterate de las noticias de la industria automovilistica o informacion relevante</p>
+                      </div>
+                  </RouterLink>
                 </div>
               </div>
 

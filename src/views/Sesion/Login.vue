@@ -102,6 +102,7 @@ export default {
                   <Alerta v-if="error" :mensaje="errorMessage"/>
                   
                   <button type="submit" class="btn btn-primary btn-block w-100 mt-2" v-if="mostrarBoton">Iniciar Sesion</button>
+                  <span class="mx-auto"><RouterLink to="/change/password" class="text-secondary text-decoration-none">Olvide mi contraseña!</RouterLink></span>
                   <span class="mx-auto"><RouterLink to="/register" class="text-secondary text-decoration-none">No tengo una cuenta, quiero registrarme!</RouterLink></span>
                 </form>
               </div>

@@ -25,6 +25,9 @@
               <RouterLink to="/admin/quejas" class="nav-link">Quejas y Sugerencias</RouterLink>
             </li>
             <li class="nav-item">
+              <RouterLink to="/admin/anuncios" class="nav-link">Anuncios y Mensajes</RouterLink>
+            </li>
+            <li class="nav-item">
               <a class="nav-link" v-on:click="cerrarSesion">Cerrar Sesion</a>
             </li>
           </ul>

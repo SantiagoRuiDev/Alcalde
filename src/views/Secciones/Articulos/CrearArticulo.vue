@@ -1,8 +1,13 @@
 <script>
+import Editor from '@tinymce/tinymce-vue'
 export default {
+  components: {
+    'editor': Editor
+  },
   data() {
     return {
       articulo: {},
+      contenido: "",
       selectedFile: null,
       URL: 'http://localhost:3000/api/articulos/crear',
       alertaMessage: '',
@@ -11,22 +16,21 @@ export default {
   },
   methods: {
     changeHandler(event) {
-      // Verifica si event.target.files es una instancia de FileList
-      if (event.target.files instanceof FileList) {
-        this.selectedFile = Array.from(event.target.files); // Convierte FileList en un array
-      }
+      this.selectedFile = event.target.files[0];
+    },
+
+    showContenido(){
+      console.log(this.contenido)
     },
 
     createArticulo() {
       let formData = new FormData();
-      if (Array.isArray(this.selectedFile)) {
-        this.selectedFile.forEach(file => {
-          formData.append('images', file);
-        })
       formData.append('titulo', this.articulo.titulo);
       formData.append('subtitulo', this.articulo.subtitulo);
-      formData.append('descripcion', this.articulo.descripcion);
+      formData.append('contenido', this.contenido);
+      formData.append('image', this.selectedFile);
       
+      console.log(formData)
       this.axios.post(this.URL, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -58,7 +62,7 @@ export default {
     }
   }
 }
-}
+
 
 
 </script>
@@ -84,15 +88,22 @@ export default {
                     <input type="text"
                       class="form-control" v-model="articulo.subtitulo">
                   </div>
+
                   <div class="mb-3">
-                    <label for="" class="form-label">Descripcion</label>
-                    <textarea class="form-control" name="" id="" rows="3" v-model="articulo.descripcion"></textarea>
+                    <label for="portada" class="form-label">Escoge una portada</label>
+                    <input type="file" class="form-control" name="portada" v-on:change="changeHandler" aria-describedby="fileHelpId">
                   </div>
-                  <div class="mb-3">
-                    <label for="image" class="form-label">Sube imagenes</label>
-                    <input type="file" multiple class="form-control" name="image" id="image" @change="changeHandler">
-                  </div>
-                  <small>Nota: La ultima imagen seleccionada sera la portada, recuerda tienes un maximo de 5 imagenes</small>
+
+                  <label for="contenido">Redacta el contenido</label>
+                  <editor
+                      v-model="contenido"
+                      api-key="4sy281yb48j3w5jel1fikdndfns9nmj1t7xjd76yyf6ok452"
+                      :init="{
+                        menubar: false,
+                        plugins: 'lists link image emoticons',
+                        toolbar: 'styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist | link image emoticons',
+                        image_dimensions: false
+                      }"/>
                   <button type="submit" class="btn btn-primary btn-block w-100 mt-2">Crear articulo</button>
                   <RouterLink to="/articulos" class="btn btn-danger btn-block w-100 mt-2">Regresar</RouterLink>
                 </form>
@@ -100,5 +111,7 @@ export default {
             </div>
           </div>
         </div>
+
+
       </div>
 </template>
