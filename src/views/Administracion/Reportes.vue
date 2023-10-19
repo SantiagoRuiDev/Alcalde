@@ -120,7 +120,7 @@ export default {
         <table class="table table-light">
             <thead>
                 <tr class="text-center">
-                    <th scope="col">Usuario</th>
+                    <th scope="col">Reportado</th>
                     <th scope="col">Foro ID</th>
                     <th scope="col">Articulo ID</th>
                     <th scope="col">Reseña ID</th>
@@ -129,7 +129,7 @@ export default {
             </thead>
             <tbody>
                 <tr class="text-center" v-for="reporte in reportes" :key="reporte.id">
-                    <td>{{reporte.id_usuario}}</td>
+                    <td>{{reporte.nombre}}</td>
                     <td>{{reporte.id_foro}}</td>
                     <td>{{reporte.id_articulo}}</td>
                     <td>{{reporte.id_resena}}</td>

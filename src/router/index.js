@@ -136,7 +136,7 @@ const router = createRouter({
       path: '/change/password',
       name: 'change',
       component: ChangePassword,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: false }
     },
     {
       path: '/articulo/crear',
@@ -229,6 +229,9 @@ router.beforeEach((to, from, next) => {
           next({ name: 'inicio' })
           break;
         case 'register':
+          next({ name: 'inicio' })
+          break;
+        case 'change':
           next({ name: 'inicio' })
           break;
         case 'listararticulos':

@@ -83,7 +83,7 @@ export default {
             </thead>
             <tbody>
                 <tr v-for="queja in quejas" :key="queja.id">
-                    <td>{{queja.usuario_id}}</td>
+                    <td>{{queja.nombre}}</td>
                     <td>{{queja.mensaje}}</td>
                     <td>
                         <span class="material-symbols-outlined btn btn-danger p-1" v-on:click="cerrarQueja(queja.id)">
