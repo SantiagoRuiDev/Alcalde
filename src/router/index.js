@@ -16,6 +16,7 @@ import Anuncios from '../views/Administracion/Anuncios.vue'
 
 import Foros from '../views/Secciones/Foros/Foros.vue'
 import VerForo from '../views/Secciones/Foros/VerForo.vue'
+import VerReglas from '../views/Secciones/Foros/VerReglas.vue'
 
 // Componentes de Reseña
 
@@ -82,6 +83,12 @@ const router = createRouter({
       path: '/foro/ver/:id',
       name: 'forosver',
       component: VerForo,
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/admin/regla/listar',
+      name: 'reglasver',
+      component: VerReglas,
       meta: { requiresAuth: true }
     },
     {

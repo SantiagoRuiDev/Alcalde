@@ -1,8 +1,16 @@
 <template>
   
   <div class="ibox-content forum-container" id="forumContainer">
-    <div class="forum-title">
-      <h3>Foros</h3>
+    <div class="forum-title d-flex flex-row">
+      <h3 class="w-100">Foros</h3>
+
+      
+      <button
+        class="text-center d-flex align-items-center btn"
+        v-on:click="showReglas" data-bs-toggle="modal" data-bs-target="#modalId"
+      >
+        <span class="material-symbols-outlined mx-auto"> info </span>
+      </button>
     </div>
 
     <div class="forum-item active">
@@ -33,6 +41,46 @@
       </div>
     </div>
     
+    
+    <!-- Modal -->
+    <div class="modal fade" id="modalId" tabindex="-1" role="dialog" aria-labelledby="modalTitleId" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitleId">Reglas de los Foros</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+          <div class="modal-body">
+            <div class="container-fluid">
+
+              <p v-if="reglas.length == 0">No hay reglas al momento...</p>
+              
+              <div class="accordion" id="accordionExample" v-else>
+                <div class="accordion-item" v-for="regla in reglas" :key="regla.id">
+                  <h2 class="accordion-header" id="headingOne">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" :data-bs-target="'#' + regla.id"  aria-expanded="false" aria-controls="collapseOne">
+                      {{ regla.nombre  }}: #{{ regla.id }}
+                    </button>
+                  </h2>
+                  <div :id="regla.id" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                    <div class="accordion-body">
+                      {{ regla.contenido  }}
+                    </div>
+                  </div>
+                </div>
+                
+              </div>
+
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            <button type="button" class="btn btn-success" data-bs-dismiss="modal">Entendido</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
 
     <div class="forum-title text-end">
       <a
@@ -52,17 +100,36 @@
   export default {
     data(){
       return {
+        reglas: [],
         foros: [],
         URL_CREAR: "http://localhost:3000/api/foros/crear",
         URL: "http://localhost:3000/api/foros/",
+        URL_REGLAS: "http://localhost:3000/api/foros/regla",
         URL_DELETE: 'http://localhost:3000/api/foros/eliminar/',
         URL_REPORT: 'http://localhost:3000/api/reportes/crear/'
       }
     },
     created: function(){
-      this.cargarForos()
+      this.cargarForos();
+      this.getReglas();
     },
     methods: {
+      getReglas(){
+        this.axios
+            .get(this.URL_REGLAS, {
+              headers: {
+                'x-access-token': this.$store.getters.getUserToken
+              }
+            })
+            .then((response) => {
+              this.reglas = response.data;
+            })
+      },
+
+      showReglas(){
+
+      },
+
       cargarForos(){
         this.axios.get(this.URL, {
           headers: {

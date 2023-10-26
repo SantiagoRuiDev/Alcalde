@@ -6,7 +6,8 @@ export default {
   },
   data() {
     return {
-      articulo: {},
+      titulo: "",
+      subtitulo: "",
       contenido: "",
       selectedFile: null,
       URL: 'http://localhost:3000/api/articulos/crear',
@@ -25,12 +26,18 @@ export default {
 
     createArticulo() {
       let formData = new FormData();
-      formData.append('titulo', this.articulo.titulo);
-      formData.append('subtitulo', this.articulo.subtitulo);
+      
+      if(this.titulo.trim() == '') return this.$swal.fire('Error', 'Ingrese un titulo', 'error');
+      if(this.subtitulo.trim() == '') return this.$swal.fire('Error', 'Ingrese un subtitulo', 'error');
+      if(this.contenido.trim() == '') return this.$swal.fire('Error', 'Ingrese contenido a su articulo', 'error');
+      if(this.selectedFile == null) return this.$swal.fire('Error', 'Ingrese una imagen', 'error');
+
+      
+      formData.append('titulo', this.titulo);
+      formData.append('subtitulo', this.subtitulo);
       formData.append('contenido', this.contenido);
       formData.append('image', this.selectedFile);
-      
-      console.log(formData)
+
       this.axios.post(this.URL, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -81,12 +88,12 @@ export default {
                   <div class="mb-3">
                     <label for="" class="form-label">Titulo</label>
                     <input type="text"
-                      class="form-control" v-model="articulo.titulo">
+                      class="form-control" v-model="titulo">
                   </div>
                   <div class="mb-3">
                     <label for="" class="form-label">Subtitulo</label>
                     <input type="text"
-                      class="form-control" v-model="articulo.subtitulo">
+                      class="form-control" v-model="subtitulo">
                   </div>
 
                   <div class="mb-3">

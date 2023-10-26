@@ -25,12 +25,12 @@ export default {
             this.porcentajeCoche1 = [{
                 puntos: this.votosInfo[0].PuntosTotales,
                 coche: this.votosInfo[0].id_coche,
-                porcentaje: (this.votosInfo[0].PuntosTotales / sumaTotalPuntos) * 100
+                porcentaje: parseFloat((this.votosInfo[0].PuntosTotales / sumaTotalPuntos) * 100).toFixed(2)
             }];
             this.porcentajeCoche2 = [{
                 puntos: this.votosInfo[1].PuntosTotales,
                 coche: this.votosInfo[1].id_coche,
-                porcentaje: (this.votosInfo[1].PuntosTotales / sumaTotalPuntos) * 100
+                porcentaje: parseFloat((this.votosInfo[1].PuntosTotales / sumaTotalPuntos) * 100).toFixed(2)
             }];
         },
 
@@ -102,6 +102,10 @@ export default {
                     <img :src="versus.coche1_imagen" alt="Imagen vehiculo" style="height: 150px;">
                     <a :href="'/res/ver/' + versus.coche1_id" class="card-title fs-2 text-decoration-none">{{ versus.coche1_titulo }}</a>
                     <p class="card-text">Calificaciones: {{ versus.coche1_calificaciones }}</p>
+                    <p class="card-text" v-for="porcentaje in porcentajeCoche1"  :key="porcentaje.coche">
+                        Votos Obtenidos: {{ porcentaje.puntos }}<br>
+                        <br>
+                        Porcentaje Obtenido: {{ porcentaje.porcentaje }}%</p>
                     <button class="btn-block btn btn-primary" v-on:click="votar(versus.coche1_id)">Votar</button>
                 </div>
                 <div class="col-4 d-grid align-items-center text-center justify-content-center">
@@ -111,6 +115,10 @@ export default {
                     <img :src="versus.coche2_imagen" alt="Imagen vehiculo" style="height: 150px;">
                     <a :href="'/res/ver/' + versus.coche2_id" class="card-title fs-2 text-decoration-none">{{ versus.coche2_titulo }}</a>
                     <p class="card-text">Calificaciones: {{ versus.coche2_calificaciones }}</p>
+                    <p class="card-text" v-for="porcentaje in porcentajeCoche2"  :key="porcentaje.coche">
+                        Votos Obtenidos: {{ porcentaje.puntos }}<br>
+                        <br>
+                        Porcentaje Obtenido: {{ porcentaje.porcentaje }}%</p>
                     <button class="btn-block btn btn-secondary" v-on:click="votar(versus.coche2_id)">Votar</button>
                 </div>
             </div>
