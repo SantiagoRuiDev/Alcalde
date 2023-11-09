@@ -59,7 +59,7 @@
                 <div class="accordion-item" v-for="regla in reglas" :key="regla.id">
                   <h2 class="accordion-header" id="headingOne">
                     <button class="accordion-button" type="button" data-bs-toggle="collapse" :data-bs-target="'#' + regla.id"  aria-expanded="false" aria-controls="collapseOne">
-                      {{ regla.nombre  }}: #{{ regla.id }}
+                      {{ regla.nombre  }}
                     </button>
                   </h2>
                   <div :id="regla.id" class="accordion-collapse collapse show" aria-labelledby="headingOne" data-bs-parent="#accordionExample">

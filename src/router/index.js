@@ -1,259 +1,259 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory } from "vue-router";
 
 // Homepage
-import Inicio from '../views/Inicio.vue'
-import Bienvenida from '../views/Bienvenida.vue'
+import Inicio from "../views/Inicio.vue";
+import Bienvenida from "../views/Bienvenida.vue";
 
 // Componentes de Moderacion
 
-import Usuarios from '../views/Administracion/Usuarios.vue'
-import Quejas from '../views/Administracion/Quejas.vue'
-import QuejasUsuario from '../views/Secciones/Quejas.vue'
-import Reportes from '../views/Administracion/Reportes.vue'
-import Anuncios from '../views/Administracion/Anuncios.vue'
+import Usuarios from "../views/Administracion/Usuarios.vue";
+import Quejas from "../views/Administracion/Quejas.vue";
+import QuejasUsuario from "../views/Secciones/Quejas.vue";
+import Reportes from "../views/Administracion/Reportes.vue";
+import Anuncios from "../views/Administracion/Anuncios.vue";
 
 // Componentes de Foros
 
-import Foros from '../views/Secciones/Foros/Foros.vue'
-import VerForo from '../views/Secciones/Foros/VerForo.vue'
-import VerReglas from '../views/Secciones/Foros/VerReglas.vue'
+import Foros from "../views/Secciones/Foros/Foros.vue";
+import VerForo from "../views/Secciones/Foros/VerForo.vue";
+import VerReglas from "../views/Secciones/Foros/VerReglas.vue";
 
 // Componentes de Reseña
 
-import Reseñas from '../views/Secciones/Reseñas/Reseñas.vue'
-import Reseña from '../views/Secciones/Reseñas/Reseña.vue'
-import VerReseña from '../views/Secciones/Reseñas/VerReseña.vue'
-import CrearReseña from '../views/Secciones/Reseñas/CrearReseña.vue'
+import Reseñas from "../views/Secciones/Reseñas/Reseñas.vue";
+import Reseña from "../views/Secciones/Reseñas/Reseña.vue";
+import VerReseña from "../views/Secciones/Reseñas/VerReseña.vue";
+import CrearReseña from "../views/Secciones/Reseñas/CrearReseña.vue";
 
 // Componentes de las Listas
 
-import Listas from '../views/Secciones/Listas/Listas.vue'
-import VerLista from '../views/Secciones/Listas/VerLista.vue'
-import ListarListas from '../views/Secciones/Listas/ListarListas.vue'
-import CrearLista from '../views/Secciones/Listas/CrearLista.vue'
-
+import Listas from "../views/Secciones/Listas/Listas.vue";
+import VerLista from "../views/Secciones/Listas/VerLista.vue";
+import ListarListas from "../views/Secciones/Listas/ListarListas.vue";
+import CrearLista from "../views/Secciones/Listas/CrearLista.vue";
 
 // Articulos Componentes
-import Articulos from '../views/Secciones/Articulos/Articulos.vue'
-import Articulo from '../views/Secciones/Articulos/Articulo.vue'
-import VerArticulos from '../views/Secciones/Articulos/VerArticulos.vue'
-import CrearArticulo from '../views/Secciones/Articulos/CrearArticulo.vue'
+import Articulos from "../views/Secciones/Articulos/Articulos.vue";
+import Articulo from "../views/Secciones/Articulos/Articulo.vue";
+import VerArticulos from "../views/Secciones/Articulos/VerArticulos.vue";
+import CrearArticulo from "../views/Secciones/Articulos/CrearArticulo.vue";
 
 // Versus Componentes
-import Versus from '../views/Secciones/Versus/Versus.vue'
-import VerVersus from '../views/Secciones/Versus/VerVersus.vue'
-import CrearVersus from '../views/Secciones/Versus/CrearVersus.vue'
-
+import Versus from "../views/Secciones/Versus/Versus.vue";
+import VerVersus from "../views/Secciones/Versus/VerVersus.vue";
+import CrearVersus from "../views/Secciones/Versus/CrearVersus.vue";
 
 // Componentes de Sesionado
-import Login from '../views/Sesion/Login.vue'
-import Register from '../views/Sesion/Register.vue'
-import ChangePassword from '../views/Sesion/Change.vue'
+import Login from "../views/Sesion/Login.vue";
+import Register from "../views/Sesion/Register.vue";
+import ChangePassword from "../views/Sesion/Change.vue";
 
-import store from '../store/index.js'
+import store from "../store/index.js";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/inicio',
-      name: 'inicio',
+      path: "/inicio",
+      name: "inicio",
       component: Inicio,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
     },
     {
-      path: '/',
-      name: 'bienvenida',
+      path: "/",
+      name: "bienvenida",
       component: Bienvenida,
-      meta: { requiresAuth: false }
+      meta: { requiresAuth: false },
     },
     {
-      path: '/admin/anuncios',
-      name: 'anuncios',
+      path: "/admin/anuncios",
+      name: "anuncios",
       component: Anuncios,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
     },
     {
-      path: '/foros',
-      name: 'foros',
+      path: "/foros",
+      name: "foros",
       component: Foros,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
     },
     {
-      path: '/foro/ver/:id',
-      name: 'forosver',
+      path: "/foro/ver/:id",
+      name: "forosver",
       component: VerForo,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
     },
     {
-      path: '/admin/regla/listar',
-      name: 'reglasver',
+      path: "/admin/regla/listar",
+      name: "reglasver",
       component: VerReglas,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
     },
     {
-      path: '/admin/usuarios',
-      name: 'usuarios',
+      path: "/admin/usuarios",
+      name: "usuarios",
       component: Usuarios,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
     },
     {
-      path: '/admin/quejas',
-      name: 'quejas',
+      path: "/admin/quejas",
+      name: "quejas",
       component: Quejas,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
     },
     {
-      path: '/admin/reportes',
-      name: 'reportes',
+      path: "/admin/reportes",
+      name: "reportes",
       component: Reportes,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
     },
     {
-      path: '/res/listar',
-      name: 'reseñaver',
+      path: "/res/listar",
+      name: "reseñaver",
       component: VerReseña,
-      meta: { requiresAuth: true}
+      meta: { requiresAuth: true },
     },
     {
-      path: '/res/crear',
-      name: 'reseñacrear',
+      path: "/res/crear",
+      name: "reseñacrear",
       component: CrearReseña,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
     },
     {
-      path: '/res/ver/:id',
-      name: 'reseñaarticulo',
+      path: "/res/ver/:id",
+      name: "reseñaarticulo",
       component: Reseña,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
     },
     {
-      path: '/res',
-      name: 'reseñas',
+      path: "/res",
+      name: "reseñas",
       component: Reseñas,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
     },
     {
-      path: '/articulos',
-      name: 'articulos',
+      path: "/articulos",
+      name: "articulos",
       component: Articulos,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
     },
     {
-      path: '/change/password',
-      name: 'change',
+      path: "/change/password",
+      name: "change",
       component: ChangePassword,
-      meta: { requiresAuth: false }
+      meta: { requiresAuth: false },
     },
     {
-      path: '/articulo/crear',
-      name: 'creararticulo',
+      path: "/articulo/crear",
+      name: "creararticulo",
       component: CrearArticulo,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
     },
     {
-      path: '/articulo/ver/:id',
-      name: 'articulo',
+      path: "/articulo/ver/:id",
+      name: "articulo",
       component: Articulo,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: false },
     },
     {
-      path: '/listas',
-      name: 'listas',
+      path: "/listas",
+      name: "listas",
       component: Listas,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
     },
     {
-      path: '/listas/ver',
-      name: 'listarlistas',
+      path: "/listas/ver",
+      name: "listarlistas",
       component: ListarListas,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
     },
     {
-      path: '/listas/ver/:id',
-      name: 'listaver',
+      path: "/listas/ver/:id",
+      name: "listaver",
       component: VerLista,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
     },
     {
-      path: '/listas/crear',
-      name: 'listacrear',
+      path: "/listas/crear",
+      name: "listacrear",
       component: CrearLista,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
     },
     {
-      path: '/versus',
-      name: 'versus',
+      path: "/versus",
+      name: "versus",
       component: Versus,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
     },
     {
-      path: '/versus/crear',
-      name: 'crearversus',
+      path: "/versus/crear",
+      name: "crearversus",
       component: CrearVersus,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
     },
     {
-      path: '/versus/:id',
-      name: 'verversus',
+      path: "/versus/:id",
+      name: "verversus",
       component: VerVersus,
-      meta: { requiresAuth: true }
+      meta: { requiresAuth: true },
     },
     {
-      path: '/articulo/listar',
-      name: 'listararticulos',
+      path: "/articulo/listar",
+      name: "listararticulos",
       component: VerArticulos,
-      meta: { requiresAuth: false }
+      meta: { requiresAuth: false },
     },
     {
-      path: '/quejas',
-      name: 'quejasysugerencias',
+      path: "/quejas",
+      name: "quejasysugerencias",
       component: QuejasUsuario,
-      meta: { requiresAuth: true}
+      meta: { requiresAuth: true },
     },
     {
-      path: '/login',
-      name: 'login',
+      path: "/login",
+      name: "login",
       component: Login,
-      meta: { requiresAuth: false }
+      meta: { requiresAuth: false },
     },
     {
-      path: '/register',
-      name: 'register',
+      path: "/register",
+      name: "register",
       component: Register,
-      meta: { requiresAuth: false }
-    }
-  ]
-})
+      meta: { requiresAuth: false },
+    },
+  ],
+});
 
 router.beforeEach((to, from, next) => {
-  const rutaProtegida = to.matched.some(record => record.meta.requiresAuth)
+  const rutaProtegida = to.matched.some((record) => record.meta.requiresAuth);
   if (rutaProtegida && !store.getters.isLoggedIn) {
-    next({ name: 'login' })
-  } else if(!rutaProtegida && store.getters.isLoggedIn) {
-      switch(to.name){
-        case 'login':
-          next({ name: 'inicio' })
-          break;
-        case 'register':
-          next({ name: 'inicio' })
-          break;
-        case 'change':
-          next({ name: 'inicio' })
-          break;
-        case 'listararticulos':
-          next()
-          break;
-        case 'bienvenida':
-          next({ name: 'inicio' })
-          break;
-        default:
-          break;
-      }
+    next({ name: "login" });
+  } else if (!rutaProtegida && store.getters.isLoggedIn) {
+    switch (to.name) {
+      case "login":
+        next({ name: "inicio" });
+        break;
+      case "register":
+        next({ name: "inicio" });
+        break;
+      case "change":
+        next({ name: "inicio" });
+        break;
+      case "articulo":
+        next();
+        break;
+      case "listararticulos":
+        next();
+        break;
+      case "bienvenida":
+        next({ name: "inicio" });
+        break;
+      default:
+        break;
+    }
   } else {
     next();
   }
-})
+});
 
-
-export default router
+export default router;

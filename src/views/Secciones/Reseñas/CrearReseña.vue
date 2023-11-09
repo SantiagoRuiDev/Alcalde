@@ -5,14 +5,19 @@ export default {
       resena: {},
       selectedFile: null,
       URL: 'http://localhost:3000/api/resenas/crear',
-      alertaMessage: ''
+      alertaMessage: '',
+      carrete: [],
+      id: ""
     }
   },
   methods: {
+    handleCarrete (event){
+      this.carrete = event.target.files;
+    },
     changeHandler (event){
       this.selectedFile = event.target.files[0];
     },
-    createResena () {
+    async createResena () {
       let formData = new FormData();
       formData.append('image', this.selectedFile);
       formData.append('marca', this.resena.marca);
@@ -25,23 +30,16 @@ export default {
       formData.append('transmision', this.resena.transmision);
       formData.append('puertas', this.resena.puertas);
       formData.append('descripcion', this.resena.descripcion);
+      formData.append('video', this.resena.video);
       
-      this.axios.post(this.URL, formData, {
+      await this.axios.post(this.URL, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           'x-access-token': this.$store.getters.getUserToken
         }
       }).then(response => {
         this.alertaMessage = response.data.message
-        this.$swal.fire(
-                      'Exito',
-                      this.alertaMessage,
-                     'success'
-                    ).then((result) => {
-                      if (result.isConfirmed) {
-                          location.reload();
-                      }
-                      })
+        this.id = response.data.id
       }).catch(error => {
         this.alertaMessage = error.response.data.error;
         this.$swal.fire(
@@ -54,6 +52,37 @@ export default {
                       }
                       })
       })
+
+
+      let imageData = new FormData();
+      let counter = 0;
+      for (let i = 0; i < this.carrete.length; i++) {
+        imageData.delete('image');
+        imageData.append('image', this.carrete[i]);
+
+        await this.axios.post(`http://localhost:3000/api/resenas/add/image/${this.id}`, imageData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'x-access-token': this.$store.getters.getUserToken
+          }
+        }).then(response => {
+          counter++;
+        }).catch(error => {
+          this.alertaMessage = error.response.data.error;
+        })
+      }
+
+      if(counter == this.carrete.length){
+        this.$swal.fire(
+                      'Exito',
+                      this.alertaMessage,
+                     'success'
+                    ).then((result) => {
+                      if (result.isConfirmed) {
+                          location.reload();
+                      }
+                      })
+      }
     }
   }
 }
@@ -123,8 +152,17 @@ export default {
                       class="form-control" aria-describedby="helpId" placeholder="" v-model="resena.motor">
                   </div>
                   <div class="mb-3">
+                    <label for="" class="form-label">Video de Youtube</label>
+                    <input type="text"
+                      class="form-control" aria-describedby="helpId" placeholder="Incrusta la ID de tu video por ejemplo: U0ZVo4kK3VM" v-model="resena.video">
+                  </div>
+                  <div class="mb-3">
                     <label for="image" class="form-label">Sube una imagen</label>
-                    <input type="file" class="form-control" name="image" id="image" @change="changeHandler">
+                    <input type="file" class="form-control" id="image" @change="changeHandler">
+                  </div>
+                  <div class="mb-3">
+                    <label for="images" class="form-label">Sube imagenes al carrete</label>
+                    <input type="file" class="form-control" id="images" multiple @change="handleCarrete">
                   </div>
                   <button type="submit" class="btn btn-primary btn-block w-100 mt-2">Crear reseña</button>
                   <RouterLink to="/res" class="btn btn-danger btn-block w-100 mt-2">Regresar</RouterLink>

@@ -36,7 +36,7 @@
       <div class="card p-2 mt-3 shadow-sm d-flex flex-row" v-for="regla in reglas" :key="regla.id">
         <div class="d-grid gap-2">
           <p class="card-title fw-bold">
-            {{ regla.nombre }}<span>: #{{ regla.id }}</span>
+            {{ regla.nombre }}
           </p>
           <p class="card-text">{{ regla.contenido }}</p>
         </div>

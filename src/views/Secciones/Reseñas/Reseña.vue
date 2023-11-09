@@ -8,6 +8,7 @@ export default {
       loading: true,
       cantidadVotos: 0,
       detalles: [],
+      carreteImages: [],
     };
   },
 
@@ -27,6 +28,7 @@ export default {
           this.resenas.push(response.data.resena[0]);
           this.detalles.push(response.data.resena[1]);
           this.cantidadVotos = response.data.calif.length;
+          this.carreteImages = response.data.resena[2];
         })
         .catch((err) => {
           console.log(err);
@@ -64,7 +66,51 @@ export default {
 
 <template>
   <div class="card mx-auto" v-for="resena in resenas" :key="resena.id">
-    <img :src="resena.imagen" />
+    <div class="imagenes">
+      <div id="carouselId" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-inner" role="listbox">
+          <div class="carousel-item active">
+            <img
+              :src="resena.imagen"
+              class="imagen-principal First slide w-100"
+            />
+          </div>
+          <div class="carousel-item">
+            <iframe
+              height="500"
+              width="700"
+              :src="'https://www.youtube.com/embed/' + resena.video"
+              title="YouTube video player"
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowfullscreen
+            ></iframe>
+          </div>
+        </div>
+        <button
+          class="carousel-control-prev"
+          type="button"
+          data-bs-target="#carouselId"
+          data-bs-slide="prev"
+        >
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button
+          class="carousel-control-next"
+          type="button"
+          data-bs-target="#carouselId"
+          data-bs-slide="next"
+        >
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
+      <div class="carrete" >
+        <img v-for="carrete in carreteImages" :key="carrete.id" :src="carrete.imagen" class="imagen-carrete" />
+      </div>
+    </div>
+
     <div class="card-body pt-0 px-0">
       <div
         class="d-flex flex-column text-center justify-content-center mt-3 px-3"
@@ -235,6 +281,72 @@ export default {
 .rate > input:checked ~ label:hover ~ label,
 .rate > label:hover ~ input:checked ~ label {
   color: #c59b08;
+}
+
+iframe {
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+}
+.imagenes {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+  height: 500px;
+  justify-content: space-between;
+}
+
+.imagen-principal {
+  height: 500px;
+  width: 70%;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 25px;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 25px;
+}
+
+.carrete {
+  display: grid;
+  gap: 5px;
+  padding: 5px;
+  overflow-y: scroll;
+}
+
+.imagen-carrete {
+  height: 200px;
+  width: 100%;
+  border: none;
+  border-radius: 25px;
+}
+
+@media only screen and (max-width: 600px) {
+
+  iframe {
+    width: 100%;
+    height: 300px;
+  }
+  .imagenes {
+    display: grid;
+    height: 100%;
+  }
+
+  .imagen-principal {
+    width: 100%;
+    height: 300px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+  }
+
+  .carrete {
+    display: flex;
+    flex-direction: row;
+    overflow-y: hidden;
+    overflow-x: scroll;
+  }
 }
 
 .card {
