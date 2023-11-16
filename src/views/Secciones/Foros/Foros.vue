@@ -25,13 +25,19 @@
               >
               <div class="forum-sub-title">Autor: {{foro.autor_nombre}}</div>
             </div>
+            <div class="col-md-1 forum-info" v-on:click="silenciarForo(foro.foro_id)">
+              <span class="material-symbols-outlined"> mobile_off </span>
+              <div>
+                <small>Silenciar</small>
+              </div>
+            </div>
             <div class="col-md-1 forum-info" v-on:click="reportarForo(foro.autor_id, foro.foro_id)">
               <span class="material-symbols-outlined"> warning </span>
               <div>
                 <small>Reportar</small>
               </div>
             </div>
-            <div class="col-md-2 forum-info" v-on:click="eliminarForo(foro.foro_id)">
+            <div class="col-md-1 forum-info" v-on:click="eliminarForo(foro.foro_id)">
               <span class="material-symbols-outlined"> delete </span>
               <div>
                 <small>Eliminar</small>
@@ -106,6 +112,7 @@
         URL: "http://localhost:3000/api/foros/",
         URL_REGLAS: "http://localhost:3000/api/foros/regla",
         URL_DELETE: 'http://localhost:3000/api/foros/eliminar/',
+        URL_MUTE: 'http://localhost:3000/api/foros/silenciar/',
         URL_REPORT: 'http://localhost:3000/api/reportes/crear/'
       }
     },
@@ -242,6 +249,43 @@
               this.$swal.fire({
                 icon: 'error',
                 title: 'Error al eliminar',
+                text: error.response.data.error,
+                confirmButtonText: 'Aceptar',
+                confirmButtonColor: '#f1bc90',
+              }).then((result) => {
+                if(result.isConfirmed) return location.reload();
+              })
+            })
+          }
+        })
+      },
+      silenciarForo(foro){
+        this.$swal.fire({
+          icon: 'warning',
+          title: '¿Quieres silenciar este foro?',
+          text: 'Los usuarios no podran escribir en este hasta que lo habilites',
+          confirmButtonText: 'Silenciar',
+          confirmButtonColor: '#f1bc90',
+        }).then((result) => {
+          if(result.isConfirmed){
+            this.axios.post(this.URL_MUTE + foro, {}, {
+              headers: {
+                'x-access-token': this.$store.getters.getUserToken
+              }  
+            }).then((response) => {
+              this.$swal.fire({
+                icon: 'success',
+                title: 'Foro Silenciado',
+                text: response.data.message,
+                confirmButtonText: 'Aceptar',
+                confirmButtonColor: '#f1bc90',
+              }).then((result) => {
+                if(result.isConfirmed) return location.reload();
+              })
+            }).catch(error => {
+              this.$swal.fire({
+                icon: 'error',
+                title: 'Error al silenciar',
                 text: error.response.data.error,
                 confirmButtonText: 'Aceptar',
                 confirmButtonColor: '#f1bc90',

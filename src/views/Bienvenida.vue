@@ -21,7 +21,7 @@
               
               <div class="d-flex">
                 <div class="row gap-5 justify-content-center">
-                  <div class="card w-25 text-center shadow col-md-4">
+                  <RouterLink to="/res/listar" class="card w-25 text-center shadow  text-decoration-none col-md-4">
                     <div class="card-body">
                       <span class="material-symbols-outlined fs-1 mb-3">
                       verified
@@ -29,8 +29,8 @@
                       <h4 class="card-title">Reseñas</h4>
                       <p class="card-text">Agrega y revisa reseñas de automoviles, la idea es dar informacion acerca de distintos modelos</p>
                     </div>
-                  </div>
-                  <div class="card w-25 text-center shadow col-md-4">
+                  </RouterLink>
+                  <RouterLink to="/foros" class="card w-25 text-center shadow text-decoration-none col-md-4">
                     <div class="card-body">
                       <span class="material-symbols-outlined fs-1 mb-3">
                       mail
@@ -38,7 +38,7 @@
                       <h4 class="card-title">Foros</h4>
                       <p class="card-text">Habla con otras personas acerca de distintos topicos, tambien puedes intercambiar ideas y opiniones</p>
                     </div>
-                  </div>
+                  </RouterLink>
                   <RouterLink to="/articulo/listar" class="card w-25 text-center shadow text-decoration-none col-md-4">
                       <div class="card-body rounded">
                         <span class="material-symbols-outlined fs-1 mb-3">

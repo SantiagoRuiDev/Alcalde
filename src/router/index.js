@@ -75,13 +75,13 @@ const router = createRouter({
       path: "/foros",
       name: "foros",
       component: Foros,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: false },
     },
     {
       path: "/foro/ver/:id",
       name: "forosver",
       component: VerForo,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: false },
     },
     {
       path: "/admin/regla/listar",
@@ -111,7 +111,7 @@ const router = createRouter({
       path: "/res/listar",
       name: "reseñaver",
       component: VerReseña,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: false },
     },
     {
       path: "/res/crear",
@@ -123,7 +123,7 @@ const router = createRouter({
       path: "/res/ver/:id",
       name: "reseñaarticulo",
       component: Reseña,
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: false },
     },
     {
       path: "/res",
@@ -242,6 +242,16 @@ router.beforeEach((to, from, next) => {
       case "articulo":
         next();
         break;
+      case "reseñaver":
+        next();
+        break;
+      case "reseñaarticulo":
+        next();
+        break;
+      case "foros":
+        next();
+      case "forosver":
+        next();
       case "listararticulos":
         next();
         break;

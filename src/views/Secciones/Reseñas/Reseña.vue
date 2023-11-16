@@ -424,4 +424,9 @@ small.justify-content-center {
     margin-bottom: 50px;
   }
 }
+
+.carousel-control-next,
+.carousel-control-prev {
+  width: 2%;
+}
 </style>

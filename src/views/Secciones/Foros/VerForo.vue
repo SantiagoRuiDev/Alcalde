@@ -98,6 +98,13 @@ export default {
                     this.mensaje = "";
                     this.cargarMensajes();
                 })
+                .catch(error => {
+                  this.$swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: error.response.data.message || 'Error al crear el mensaje',
+                  })
+                });
             }
         }
     }
