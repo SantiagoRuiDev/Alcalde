@@ -31,6 +31,9 @@
               <RouterLink to="/admin/regla/listar" class="nav-link">Reglas</RouterLink>
             </li>
             <li class="nav-item">
+              <RouterLink to="/notificaciones" class="nav-link">Notificaciones</RouterLink>
+            </li>
+            <li class="nav-item">
               <a class="nav-link" v-on:click="cerrarSesion">Cerrar Sesion</a>
             </li>
           </ul>

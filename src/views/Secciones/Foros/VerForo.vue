@@ -11,7 +11,7 @@
             <img src="https://therichpost.com/wp-content/uploads/2020/06/avatar2.png" alt="user" width="50" class="rounded-circle">
             <small class="text-muted mx-3">{{ mensaje.nombre }}</small>
              <div class="media-body ml-3 mt-2 d-flex gap-2 align-items-center">
-               <div class="bg-light rounded py-2 px-3 mb-2">
+               <div class="bg-light rounded py-2 px-3 mb-2" v-if="mensaje.mensaje != ''">
                  <p class="text-small mb-0 text-muted">{{mensaje.mensaje}}</p>
                </div>
                 <button @click="deleteMessage(mensaje.id)" type="button" class="border-0 bg-transparent">
@@ -27,6 +27,7 @@
          </div>
          <!-- Typing area -->
          <form action="#" class="bg-light">
+           <div class="px-2 pt-2 items-center d-grid text-secondary" v-if="selectedFile != null">Imagen Seleccionada: {{ selectedFile.name }}</div>
            <div class="input-group">
              <input type="text" v-model="mensaje" placeholder="Escribe un nuevo mensaje" aria-describedby="button-addon2" class="form-control rounded-0 border-0 py-4 bg-light">
              <div class="input-group-append d-grid">
@@ -86,9 +87,11 @@ export default {
         },
 
         crearMensaje(){
+            this.data.delete('mensaje')
+            this.data.delete('imagen')
             this.data.append('mensaje', this.mensaje)
             this.data.append('imagen', this.selectedFile)
-            if(this.mensaje.trim() != ""){
+            if(this.mensaje.trim() != "" || this.selectedFile != null){
                 this.axios.post(this.URL_CREAR + this.$route.params.id, this.data, {
                     headers: {
                         'x-access-token': this.$store.getters.getUserToken

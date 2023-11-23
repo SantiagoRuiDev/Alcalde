@@ -25,6 +25,9 @@
               <RouterLink to="/foros" class="nav-link">Foros</RouterLink>
             </li>
             <li class="nav-item">
+              <RouterLink to="/notificaciones" class="nav-link">Notificaciones</RouterLink>
+            </li>
+            <li class="nav-item">
               <a class="nav-link" v-on:click="cerrarSesion">Cerrar Sesion</a>
             </li>
           </ul>
