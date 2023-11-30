@@ -4,6 +4,10 @@ import { createRouter, createWebHistory } from "vue-router";
 
 import Notificaciones from "../views/Secciones/Notificaciones.vue";
 
+// Registros
+
+import Registros from "../views/Secciones/Registros.vue";
+
 // Homepage
 import Inicio from "../views/Inicio.vue";
 import Bienvenida from "../views/Bienvenida.vue";
@@ -79,6 +83,12 @@ const router = createRouter({
       path: "/notificaciones",
       name: "notifications",
       component: Notificaciones,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: "/admin/registros",
+      name: "registros",
+      component: Registros,
       meta: { requiresAuth: true },
     },
     {

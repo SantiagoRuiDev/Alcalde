@@ -268,59 +268,59 @@ export default {
           });
       }
     },
-    reportarForo(id, foro) {
-      this.$swal
-        .fire({
-          icon: "warning",
-          title: "¿Quieres reportar este foro?",
-          text: "Reporta el foro, si tiene contenido indebido o malicioso",
-          confirmButtonText: "Reportar",
-          confirmButtonColor: "#f1bc90",
-        })
-        .then((result) => {
-          if (result.isConfirmed) {
-            let data = {
-              id_usuario: id,
-              id_articulo: 0,
-              id_foro: foro,
-              id_resena: 0,
-            };
-            this.axios
-              .post(this.URL_REPORT, data, {
-                headers: {
-                  "x-access-token": this.$store.getters.getUserToken,
-                },
+    async reportarForo(id, foro) {
+      const { value: text } = await this.$swal.fire({
+        title: "¿Quieres reportar este foro?",
+        input: "text",
+        inputLabel: "Ingresa una razon",
+        inputPlaceholder: "¿Porque reportas?",
+        confirmButtonText: "Reportar",
+        confirmButtonColor: "#f1bc90",
+      });
+      if (text) {
+        let data = {
+          id_usuario: id,
+          id_articulo: 0,
+          id_foro: foro,
+          id_resena: 0,
+          motivo: text,
+        };
+        this.axios
+          .post(this.URL_REPORT, data, {
+            headers: {
+              "x-access-token": this.$store.getters.getUserToken,
+            },
+          })
+          .then((response) => {
+            this.$swal
+              .fire({
+                icon: "success",
+                title: "Foro reportado",
+                text: response.data.message,
+                confirmButtonText: "Aceptar",
+                confirmButtonColor: "#f1bc90",
               })
-              .then((response) => {
-                this.$swal
-                  .fire({
-                    icon: "success",
-                    title: "Foro reportado",
-                    text: response.data.message,
-                    confirmButtonText: "Aceptar",
-                    confirmButtonColor: "#f1bc90",
-                  })
-                  .then((result) => {
-                    if (result.isConfirmed)
-                      return this.$router.push({ name: "foros" });
-                  });
-              })
-              .catch((error) => {
-                this.$swal
-                  .fire({
-                    icon: "error",
-                    title: "Error al reportar",
-                    text: error.response.data.error,
-                    confirmButtonText: "Aceptar",
-                    confirmButtonColor: "#f1bc90",
-                  })
-                  .then((result) => {
-                    if (result.isConfirmed) return location.reload();
-                  });
+              .then((result) => {
+                if (result.isConfirmed)
+                  return this.$router.push({ name: "foros" });
               });
-          }
-        });
+          })
+          .catch((error) => {
+            this.$swal
+              .fire({
+                icon: "error",
+                title: "Error al reportar",
+                text: error.response.data.error,
+                confirmButtonText: "Aceptar",
+                confirmButtonColor: "#f1bc90",
+              })
+              .then((result) => {
+                if (result.isConfirmed) return location.reload();
+              });
+          });
+      }
     },
+    
     eliminarForo(foro) {
       this.$swal
         .fire({

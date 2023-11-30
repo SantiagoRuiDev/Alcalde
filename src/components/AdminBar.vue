@@ -22,10 +22,13 @@
               <RouterLink to="/admin/reportes" class="nav-link">Reportes</RouterLink>
             </li>
             <li class="nav-item">
-              <RouterLink to="/admin/quejas" class="nav-link">Quejas y Sugerencias</RouterLink>
+              <RouterLink to="/admin/quejas" class="nav-link">Quejas</RouterLink>
             </li>
             <li class="nav-item">
-              <RouterLink to="/admin/anuncios" class="nav-link">Anuncios y Mensajes</RouterLink>
+              <RouterLink to="/admin/anuncios" class="nav-link">Anuncios</RouterLink>
+            </li>
+            <li class="nav-item">
+              <RouterLink to="/admin/registros" class="nav-link">Registros</RouterLink>
             </li>
             <li class="nav-item">
               <RouterLink to="/admin/regla/listar" class="nav-link">Reglas</RouterLink>
