@@ -4,11 +4,21 @@ export default {
     return {
       resenas: [],
       URL: "http://localhost:3000/api/resenas/",
+      URL_SUBFORO: "http://localhost:3000/api/subforo/",
       URL_CALIFICAR: "http://localhost:3000/api/calificaciones/crear",
+      URL_STRIKES: "http://localhost:3000/api/strikes/sancionar/",
       loading: true,
       cantidadVotos: 0,
       detalles: [],
       carreteImages: [],
+      comentarios: [],
+      likes: [],
+      replicas: [],
+      subforoSelected: -1,
+      messageFile: null,
+      replyMode: false,
+      repliedMessage: null,
+      message: "",
     };
   },
 
@@ -17,6 +27,52 @@ export default {
   },
 
   methods: {
+    handleFile(e) {
+      this.messageFile = e.target.files[0];
+    },
+
+    closeReply() {
+      this.replyMode = false;
+    },
+
+    muteSubforo() {
+      this.axios
+        .post(
+          this.URL_SUBFORO +
+            "mute/" +
+            this.$route.params.id +
+            "/" +
+            this.subforoSelected,
+          {},
+          {
+            headers: {
+              "x-access-token": this.$store.getters.getUserToken,
+            },
+          }
+        )
+        .then((response) => {
+          this.$swal.fire({
+            icon: "success",
+            title: response.data.message,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+        })
+        .catch((error) => {
+          this.$swal.fire({
+            icon: "error",
+            title: error.response.data.error,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+        });
+    },
+
+    replyMessage(id) {
+      this.repliedMessage = id;
+      this.replyMode = true;
+    },
+
     getResena() {
       this.axios
         .get(this.URL + this.$route.params.id, {
@@ -32,6 +88,206 @@ export default {
         })
         .catch((err) => {
           console.log(err);
+        });
+    },
+
+    deleteMessage(id) {
+      this.axios
+        .post(
+          this.URL_SUBFORO + "delete/" + id,
+          {},
+          {
+            headers: {
+              "x-access-token": this.$store.getters.getUserToken,
+            },
+          }
+        )
+        .then((response) => {
+          this.$swal.fire({
+            icon: "success",
+            title: response.data.message,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+          this.seeSubforo(this.$route.params.id, this.subforoSelected);
+        })
+        .catch((error) => {
+          this.$swal.fire({
+            icon: "error",
+            title: error.response.data.error,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+        });
+    },
+
+    ordenarComentarios() {
+      // Debe verse asi
+      // {texto:, imagen:, usuario:, likes: [], reply: []}
+
+      let comentariosStructure = [];
+
+      this.comentarios.forEach((comentario) => {
+        comentariosStructure.push({
+          id: comentario.id,
+          texto: comentario.texto,
+          imagen: comentario.imagen,
+          nombre: comentario.nombre,
+          subforo: comentario.id_subforo,
+          likes: this.likes.filter(
+            (like) => like.id_comentario == comentario.id
+          ),
+          replicas: this.replicas.filter(
+            (replica) => replica.id_comentario == comentario.id
+          ),
+        });
+      });
+
+      this.comentarios = comentariosStructure;
+    },
+
+    sendMessage() {
+      if (this.message.trim() == "") {
+        this.$swal.fire({
+          icon: "error",
+          title: "No puedes enviar un mensaje vacio",
+          showConfirmButton: false,
+          timer: 1000,
+        });
+        return;
+      }
+
+      if (this.replyMode == false) {
+        let formData = new FormData();
+        formData.append("comentario", this.message);
+        formData.append("imagen", this.messageFile);
+
+        this.axios
+          .post(
+            this.URL_SUBFORO +
+              this.$route.params.id +
+              "/" +
+              this.subforoSelected,
+            formData,
+            {
+              headers: {
+                "x-access-token": this.$store.getters.getUserToken,
+              },
+            }
+          )
+          .then((response) => {
+            this.$swal.fire({
+              icon: "success",
+              title: response.data.message,
+              showConfirmButton: false,
+              timer: 1500,
+            });
+            this.message = "";
+            this.messageFile = null;
+            this.seeSubforo(this.$route.params.id, this.subforoSelected);
+          })
+          .catch((error) => {
+            this.$swal.fire({
+              icon: "error",
+              title: error.response.data.error,
+              showConfirmButton: false,
+              timer: 1500,
+            });
+          });
+      } else {
+        let formData = new FormData();
+        formData.append("texto", this.message);
+        formData.append("imagen", this.messageFile);
+
+        this.axios
+          .post(
+            this.URL_SUBFORO +
+              "reply/" +
+              this.$route.params.id +
+              "/" +
+              this.subforoSelected +
+              "/" +
+              this.repliedMessage,
+            formData,
+            {
+              headers: {
+                "x-access-token": this.$store.getters.getUserToken,
+              },
+            }
+          )
+          .then((response) => {
+            this.$swal.fire({
+              icon: "success",
+              title: response.data.message,
+              showConfirmButton: false,
+              timer: 1500,
+            });
+            this.message = "";
+            this.messageFile = null;
+            this.seeSubforo(this.$route.params.id, this.subforoSelected);
+          })
+          .catch((error) => {
+            this.$swal.fire({
+              icon: "error",
+              title: error.response.data.error,
+              showConfirmButton: false,
+              timer: 1500,
+            });
+          });
+      }
+    },
+
+    seeSubforo(resena, id) {
+      this.axios
+        .get(this.URL_SUBFORO + resena + "/" + id, {
+          headers: {
+            "x-access-token": this.$store.getters.getUserToken,
+          },
+        })
+        .then((response) => {
+          this.comentarios = response.data[0];
+          this.likes = response.data[1];
+          this.replicas = response.data[2];
+          this.subforoSelected = id;
+          this.ordenarComentarios();
+        })
+        .catch((error) => {
+          this.$swal.fire({
+            icon: "error",
+            title: error.response.data.error,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+        });
+    },
+
+    likeMessage(id, comentario) {
+      this.axios
+        .post(
+          this.URL_SUBFORO + "like/" + comentario + "/" + id,
+          {},
+          {
+            headers: {
+              "x-access-token": this.$store.getters.getUserToken,
+            },
+          }
+        )
+        .then((response) => {
+          this.$swal.fire({
+            icon: "success",
+            title: response.data.message,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+          this.seeSubforo(this.$route.params.id, this.subforoSelected);
+        })
+        .catch((error) => {
+          this.$swal.fire({
+            icon: "error",
+            title: error.response.data.error,
+            showConfirmButton: false,
+            timer: 1500,
+          });
         });
     },
 
@@ -59,6 +315,68 @@ export default {
             timer: 1500,
           });
         });
+    },
+
+    deleteReply(id){
+      this.axios
+        .post(
+          this.URL_SUBFORO + "delete/reply/" + id,
+          {},
+          {
+            headers: {
+              "x-access-token": this.$store.getters.getUserToken,
+            },
+          }
+        )
+        .then((response) => {
+          this.$swal.fire({
+            icon: "success",
+            title: response.data.message,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+          this.seeSubforo(this.$route.params.id, this.subforoSelected);
+        })
+        .catch((error) => {
+          this.$swal.fire({
+            icon: "error",
+            title: error.response.data.error,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+        });
+    },
+
+    async strikeUsuario(id) {
+      const { value: text } = await this.$swal.fire({
+        title: "¿Quieres sancionar a este usuario?",
+        text: "Este tiene un maximo de 3 sanciones",
+        input: "text",
+        inputLabel: "Ingresa una razon",
+        inputPlaceholder: "¿Porque sancionas?",
+        confirmButtonText: "Sancionar",
+        confirmButtonColor: "#f1bc90",
+      });
+
+      if (text) {
+        this.axios
+          .post(
+            this.URL_STRIKES + id,
+            { razon: text },
+            {
+              headers: {
+                "x-access-token": this.$store.getters.getUserToken,
+              },
+            }
+          )
+          .then((response) => {
+            this.$swal.fire("Sancionado", response.data.message, "success");
+            location.reload();
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+      }
     },
   },
 };
@@ -106,8 +424,13 @@ export default {
           <span class="visually-hidden">Next</span>
         </button>
       </div>
-      <div class="carrete" >
-        <img v-for="carrete in carreteImages" :key="carrete.id" :src="carrete.imagen" class="imagen-carrete" />
+      <div class="carrete">
+        <img
+          v-for="carrete in carreteImages"
+          :key="carrete.id"
+          :src="carrete.imagen"
+          class="imagen-carrete"
+        />
       </div>
     </div>
 
@@ -228,19 +551,248 @@ export default {
           <span class="material-symbols-outlined fs-1 text-center">
             construction
           </span>
-          <button class="btn btn-danger btn-block">Fallos y mecanica</button>
+          <button
+            class="btn btn-danger btn-block"
+            @click="seeSubforo(resena.id, 0)"
+          >
+            Fallos y mecanica
+          </button>
         </div>
         <div class="d-grid justify-content-center mx-auto gap-3">
           <span class="material-symbols-outlined fs-1 text-center">
             mystery
           </span>
-          <button class="btn btn-danger btn-block">Consejos y dudas</button>
+          <button
+            class="btn btn-danger btn-block"
+            @click="seeSubforo(resena.id, 1)"
+          >
+            Consejos y dudas
+          </button>
         </div>
         <div class="d-grid justify-content-center mx-auto gap-3">
           <span class="material-symbols-outlined fs-1 text-center">
             imagesmode
           </span>
-          <button class="btn btn-danger btn-block">Imagenes</button>
+          <button
+            class="btn btn-danger btn-block"
+            @click="seeSubforo(resena.id, 2)"
+          >
+            Imagenes
+          </button>
+        </div>
+      </div>
+
+      <div class="comentarios mt-5" v-if="subforoSelected != -1">
+        <div class="d-grid justify-content-center mx-auto gap-3 mb-5">
+          <span class="material-symbols-outlined fs-1 text-center">
+            volume_mute
+          </span>
+          <button class="btn btn-danger btn-block" @click="muteSubforo">
+            Silenciar este subforo
+          </button>
+        </div>
+        <div class="" v-if="comentarios.length == 0">
+          <p>No hay comentarios en este subforo!</p>
+        </div>
+
+        <div class="" v-else>
+          <div
+            class="media w-50 mb-3"
+            v-for="comentario in comentarios"
+            :key="comentario.id"
+          >
+            <img
+              src="https://therichpost.com/wp-content/uploads/2020/06/avatar2.png"
+              alt="user"
+              width="50"
+              class="rounded-circle"
+            />
+            <small class="text-muted text fs-6 mx-3">{{ comentario.nombre }}</small>
+            <div class="media-body ml-3 mt-2 d-flex gap-2 align-items-center">
+              <div
+                class="bg-light rounded py-2 px-3 mb-2"
+                v-if="comentario.texto != ''"
+              >
+                <p class="text-small mb-0 text-muted">{{ comentario.texto }}</p>
+              </div>
+              <button
+                @click="replyMessage(comentario.id)"
+                type="button"
+                class="border-0 bg-transparent"
+              >
+                <span
+                  class="material-symbols-outlined"
+                  @click="replyMessage(comentario.id)"
+                >
+                  reply
+                </span>
+              </button>
+              <button
+                type="button"
+                class="border-0 bg-transparent d-flex items-center mb-1 gap-2"
+                v-if="likes.length > 0"
+              >
+                {{ likes.length }}
+                <span
+                  class="material-symbols-outlined"
+                  @click="likeMessage(comentario.subforo, comentario.id)"
+                >
+                  thumb_up
+                </span>
+              </button>
+              <button type="button" class="border-0 bg-transparent" v-else>
+                <span
+                  class="material-symbols-outlined"
+                  @click="likeMessage(comentario.subforo, comentario.id)"
+                >
+                  thumb_up
+                </span>
+              </button>
+              <button
+                @click="deleteMessage(comentario.id)"
+                type="button"
+                class="border-0 bg-transparent"
+              >
+                <span class="material-symbols-outlined"> delete </span>
+              </button>
+              <button
+                @click="strikeUsuario(comentario.id_usuario)"
+                type="button"
+                class="border-0 bg-transparent"
+              >
+                <span class="material-symbols-outlined"> warning </span>
+              </button>
+            </div>
+            <div v-if="comentario.imagen != ''">
+              <img :src="comentario.imagen" alt="Chat Message Image" />
+            </div>
+
+            <div class="" v-if="comentario.replicas.length > 0">
+              <div
+                class=""
+                v-for="replica in comentario.replicas"
+                :key="replica.id"
+              >
+                <div class="replica-box">
+                  <img
+                    src="https://therichpost.com/wp-content/uploads/2020/06/avatar3.png"
+                    alt="user"
+                    width="30"
+                    class="rounded-circle"
+                  />
+                  <small class="text-muted mx-3  fs-6"
+                    >{{ replica.nombre }} : Replica a
+                    {{ comentario.nombre }}</small
+                  >
+                  <div
+                    class="media-body ml-3 mt-2 d-flex gap-2 align-items-center"
+                  >
+                    <div
+                      class="bg-light rounded py-2 px-3 mb-2"
+                      v-if="replica.texto != ''"
+                    >
+                      <p class="text-small mb-0 text-muted">
+                        {{ replica.texto }}
+                      </p>
+                    </div>
+                    <button
+                      @click="deleteReply(replica.id)"
+                      type="button"
+                      class="border-0 bg-transparent"
+                    >
+                      <span
+                        class="material-symbols-outlined"
+                        @click="deleteReply(replica.id)"
+                      >
+                        delete
+                      </span>
+                    </button>
+                    <button
+                      @click="strikeUsuario(replica.id_usuario)"
+                      type="button"
+                      class="border-0 bg-transparent"
+                    >
+                      <span
+                        class="material-symbols-outlined"
+                        @click="strikeUsuario(replica.id_usuario)"
+                      >
+                        warning
+                      </span>
+                    </button>
+                  </div>
+
+                  <div v-if="replica.imagen != ''">
+                    <img
+                      :src="replica.imagen"
+                      alt="Chat Message Image"
+                      class="reply-image"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="d-flex justify-content-center mx-auto gap-3 w-full"
+          v-if="!replyMode"
+        >
+          <div class="mb-3">
+            <label for="" class="form-label">Comentario</label>
+            <input
+              type="text"
+              class="form-control"
+              v-model="message"
+              placeholder="Añade un mensaje a la reseña"
+            />
+          </div>
+          <input
+            type="file"
+            id="file-message"
+            class="d-none"
+            @change="handleFile"
+          />
+          <label type="button" for="file-message" class="btn btn-primary">
+            <span class="material-symbols-outlined text-center">
+              imagesmode
+            </span>
+          </label>
+          <button type="button" @click="sendMessage" class="btn btn-danger">
+            Enviar
+          </button>
+        </div>
+        <div class="d-flex justify-content-center mx-auto gap-3 w-full" v-else>
+          <button
+            @click="closeReply"
+            type="button"
+            class="border-0 bg-transparent"
+          >
+            <span class="material-symbols-outlined"> close </span>
+          </button>
+          <div class="mb-3">
+            <label for="" class="form-label">Replica</label>
+            <input
+              type="text"
+              class="form-control"
+              v-model="message"
+              placeholder="Escribe una replica al comentario"
+            />
+          </div>
+          <input
+            type="file"
+            id="file-message"
+            class="d-none"
+            @change="handleFile"
+          />
+          <label type="button" for="file-message" class="btn btn-primary">
+            <span class="material-symbols-outlined text-center">
+              imagesmode
+            </span>
+          </label>
+          <button type="button" @click="sendMessage" class="btn btn-danger">
+            Enviar
+          </button>
         </div>
       </div>
     </div>
@@ -248,6 +800,20 @@ export default {
 </template>
 
 <style scoped>
+.comentarios {
+  width: 90%;
+  margin: 0px auto;
+}
+
+.comentarios div {
+  width: 100%;
+  align-items: center;
+}
+
+.comentarios div button {
+  height: 48px;
+}
+
 .rate {
   float: left;
   height: 46px;
@@ -322,7 +888,6 @@ iframe {
 }
 
 @media only screen and (max-width: 600px) {
-
   iframe {
     width: 100%;
     height: 300px;
@@ -429,4 +994,17 @@ small.justify-content-center {
 .carousel-control-prev {
   width: 2%;
 }
+
+
+.replica-box {
+  margin-left: 50px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  width: 240px;
+}
+
+.reply-image {
+  height: 200px;
+}
+
 </style>
