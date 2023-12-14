@@ -4,6 +4,7 @@ export default {
     return {
       resenas: [],
       URL: "http://localhost:3000/api/resenas/",
+      URL_COMENTAR: "http://localhost:3000/api/resenas/comentario/",
       URL_SUBFORO: "http://localhost:3000/api/subforo/",
       URL_CALIFICAR: "http://localhost:3000/api/calificaciones/crear",
       URL_STRIKES: "http://localhost:3000/api/strikes/sancionar/",
@@ -19,6 +20,8 @@ export default {
       replyMode: false,
       repliedMessage: null,
       message: "",
+      comentariosResena: [],
+      comentario: "",
     };
   },
 
@@ -29,6 +32,39 @@ export default {
   methods: {
     handleFile(e) {
       this.messageFile = e.target.files[0];
+    },
+
+    sendComentario() {
+      this.axios
+        .post(
+          this.URL_COMENTAR + this.$route.params.id,
+          {
+            comentario: this.comentario,
+          },
+          {
+            headers: {
+              "x-access-token": this.$store.getters.getUserToken,
+            },
+          }
+        )
+        .then((response) => {
+          this.$swal.fire({
+            icon: "success",
+            title: response.data.message,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+          this.comentario = "";
+          this.getResena();
+        })
+        .catch((error) => {
+          this.$swal.fire({
+            icon: "error",
+            title: error.response.data.error,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+        });
     },
 
     closeReply() {
@@ -81,10 +117,16 @@ export default {
           },
         })
         .then((response) => {
+          this.resenas = [];
+          this.detalles = [];
+          this.carreteImages = [];
+          this.comentariosResena = [];
+
           this.resenas.push(response.data.resena[0]);
           this.detalles.push(response.data.resena[1]);
           this.cantidadVotos = response.data.calif.length;
           this.carreteImages = response.data.resena[2];
+          this.comentariosResena = response.data.comentarios;
         })
         .catch((err) => {
           console.log(err);
@@ -130,6 +172,7 @@ export default {
       this.comentarios.forEach((comentario) => {
         comentariosStructure.push({
           id: comentario.id,
+          id_usuario: comentario.id_usuario,
           texto: comentario.texto,
           imagen: comentario.imagen,
           nombre: comentario.nombre,
@@ -317,7 +360,7 @@ export default {
         });
     },
 
-    deleteReply(id){
+    deleteReply(id) {
       this.axios
         .post(
           this.URL_SUBFORO + "delete/reply/" + id,
@@ -488,6 +531,224 @@ export default {
           <span class="material-symbols-outlined fs-1 text-center"> star </span>
           <p class="fw-bold">Calificaciones Otorgadas: {{ cantidadVotos }}</p>
         </div>
+
+        <div class="d-flex gap-2 w-3/4 mx-auto items-center flex-row mb-5">
+          <div class="rate">
+            <p>Gasolina</p>
+            <input
+              type="radio"
+              id="star5"
+              name="rate"
+              value="5"
+              v-on:click="calificarResena(resena.id, 5)"
+            />
+            <label for="star5" title="text">5 stars</label>
+            <input
+              type="radio"
+              id="star4"
+              name="rate"
+              value="4"
+              v-on:click="calificarResena(resena.id, 4)"
+            />
+            <label for="star4" title="text">4 stars</label>
+            <input
+              type="radio"
+              id="star3"
+              name="rate"
+              value="3"
+              v-on:click="calificarResena(resena.id, 3)"
+            />
+            <label for="star3" title="text">3 stars</label>
+            <input
+              type="radio"
+              id="star2"
+              name="rate"
+              value="2"
+              v-on:click="calificarResena(resena.id, 2)"
+            />
+            <label for="star2" title="text">2 stars</label>
+            <input
+              type="radio"
+              id="star1"
+              name="rate"
+              value="1"
+              v-on:click="calificarResena(resena.id, 1)"
+            />
+            <label for="star1" title="text">1 star</label>
+          </div>
+          <div class="rate">
+            <p>Confiabilidad</p>
+            <input
+              type="radio"
+              id="star5"
+              name="rate"
+              value="5"
+              v-on:click="calificarResena(resena.id, 5)"
+            />
+            <label for="star5" title="text">5 stars</label>
+            <input
+              type="radio"
+              id="star4"
+              name="rate"
+              value="4"
+              v-on:click="calificarResena(resena.id, 4)"
+            />
+            <label for="star4" title="text">4 stars</label>
+            <input
+              type="radio"
+              id="star3"
+              name="rate"
+              value="3"
+              v-on:click="calificarResena(resena.id, 3)"
+            />
+            <label for="star3" title="text">3 stars</label>
+            <input
+              type="radio"
+              id="star2"
+              name="rate"
+              value="2"
+              v-on:click="calificarResena(resena.id, 2)"
+            />
+            <label for="star2" title="text">2 stars</label>
+            <input
+              type="radio"
+              id="star1"
+              name="rate"
+              value="1"
+              v-on:click="calificarResena(resena.id, 1)"
+            />
+            <label for="star1" title="text">1 star</label>
+          </div>
+          <div class="rate">
+            <p>Confort</p>
+            <input
+              type="radio"
+              id="star5"
+              name="rate"
+              value="5"
+              v-on:click="calificarResena(resena.id, 5)"
+            />
+            <label for="star5" title="text">5 stars</label>
+            <input
+              type="radio"
+              id="star4"
+              name="rate"
+              value="4"
+              v-on:click="calificarResena(resena.id, 4)"
+            />
+            <label for="star4" title="text">4 stars</label>
+            <input
+              type="radio"
+              id="star3"
+              name="rate"
+              value="3"
+              v-on:click="calificarResena(resena.id, 3)"
+            />
+            <label for="star3" title="text">3 stars</label>
+            <input
+              type="radio"
+              id="star2"
+              name="rate"
+              value="2"
+              v-on:click="calificarResena(resena.id, 2)"
+            />
+            <label for="star2" title="text">2 stars</label>
+            <input
+              type="radio"
+              id="star1"
+              name="rate"
+              value="1"
+              v-on:click="calificarResena(resena.id, 1)"
+            />
+            <label for="star1" title="text">1 star</label>
+          </div>
+          <div class="rate">
+            <p>Diseño</p>
+            <input
+              type="radio"
+              id="star5"
+              name="rate"
+              value="5"
+              v-on:click="calificarResena(resena.id, 5)"
+            />
+            <label for="star5" title="text">5 stars</label>
+            <input
+              type="radio"
+              id="star4"
+              name="rate"
+              value="4"
+              v-on:click="calificarResena(resena.id, 4)"
+            />
+            <label for="star4" title="text">4 stars</label>
+            <input
+              type="radio"
+              id="star3"
+              name="rate"
+              value="3"
+              v-on:click="calificarResena(resena.id, 3)"
+            />
+            <label for="star3" title="text">3 stars</label>
+            <input
+              type="radio"
+              id="star2"
+              name="rate"
+              value="2"
+              v-on:click="calificarResena(resena.id, 2)"
+            />
+            <label for="star2" title="text">2 stars</label>
+            <input
+              type="radio"
+              id="star1"
+              name="rate"
+              value="1"
+              v-on:click="calificarResena(resena.id, 1)"
+            />
+            <label for="star1" title="text">1 star</label>
+          </div>
+          <div class="rate">
+            <p>Manejo</p>
+            <input
+              type="radio"
+              id="star5"
+              name="rate"
+              value="5"
+              v-on:click="calificarResena(resena.id, 5)"
+            />
+            <label for="star5" title="text">5 stars</label>
+            <input
+              type="radio"
+              id="star4"
+              name="rate"
+              value="4"
+              v-on:click="calificarResena(resena.id, 4)"
+            />
+            <label for="star4" title="text">4 stars</label>
+            <input
+              type="radio"
+              id="star3"
+              name="rate"
+              value="3"
+              v-on:click="calificarResena(resena.id, 3)"
+            />
+            <label for="star3" title="text">3 stars</label>
+            <input
+              type="radio"
+              id="star2"
+              name="rate"
+              value="2"
+              v-on:click="calificarResena(resena.id, 2)"
+            />
+            <label for="star2" title="text">2 stars</label>
+            <input
+              type="radio"
+              id="star1"
+              name="rate"
+              value="1"
+              v-on:click="calificarResena(resena.id, 1)"
+            />
+            <label for="star1" title="text">1 star</label>
+          </div>
+        </div>
       </div>
       <hr class="mt-2 mx-3" />
 
@@ -545,6 +806,172 @@ export default {
           </div>
         </div>
       </div>
+
+      <div class="detalles">
+        <div
+          class="accordion accordion-flush w-75 mx-auto"
+          id="accordionFlushExample"
+        >
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="flush-headingOne">
+              <button
+                class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#flush-collapseOne"
+                aria-expanded="true"
+                aria-controls="flush-collapseOne"
+              >
+                Motor
+              </button>
+            </h2>
+            <div
+              id="flush-collapseOne"
+              class="accordion-collapse collapse"
+              aria-labelledby="flush-headingOne"
+              data-bs-parent="#accordionFlushExample"
+            >
+              <div class="accordion-body">
+                <!-- Some borders are removed -->
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item">Combustible:</li>
+                  <li class="list-group-item">Potencia:</li>
+                  <li class="list-group-item">Torque:</li>
+                  <li class="list-group-item">Cilindros:</li>
+                  <li class="list-group-item">Valvulas:</li>
+                  <li class="list-group-item">Alimentacion:</li>
+                  <li class="list-group-item">Sistema start/stop:</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="accordion accordion-flush w-75 mx-auto"
+          id="accordionFlushExample"
+        >
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="flush-headingTwo">
+              <button
+                class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#flush-collapseTwo"
+                aria-expanded="true"
+                aria-controls="flush-collapseTwo"
+              >
+                Performance
+              </button>
+            </h2>
+            <div
+              id="flush-collapseTwo"
+              class="accordion-collapse collapse"
+              aria-labelledby="flush-headingTwo"
+              data-bs-parent="#accordionFlushExample"
+            >
+              <div class="accordion-body">
+                <!-- Some borders are removed -->
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item">Aceleracion 0-100km:</li>
+                  <li class="list-group-item">Velocidad Maxima:</li>
+                  <li class="list-group-item">Rendimiento en ciudad:</li>
+                  <li class="list-group-item">Rendimiento en ruta:</li>
+                  <li class="list-group-item">Rendimiento mixto:</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="accordion accordion-flush w-75 mx-auto"
+          id="accordionFlushExample"
+        >
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="flush-headingThree">
+              <button
+                class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#flush-collapseThree"
+                aria-expanded="true"
+                aria-controls="flush-collapseThree"
+              >
+                Transmision y Chasis
+              </button>
+            </h2>
+            <div
+              id="flush-collapseThree"
+              class="accordion-collapse collapse"
+              aria-labelledby="flush-headingThree"
+              data-bs-parent="#accordionFlushExample"
+            >
+              <div class="accordion-body">
+                <!-- Some borders are removed -->
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item">Motor (posición):</li>
+                  <li class="list-group-item">Traccion:</li>
+                  <li class="list-group-item">Transmisión:</li>
+                  <li class="list-group-item">
+                    Frenos (Delanteros y traseros):
+                  </li>
+                  <li class="list-group-item">Neumáticos:</li>
+                  <li class="list-group-item">Suspensión delantera:</li>
+                  <li class="list-group-item">Suspensión trasera:</li>
+                  <li class="list-group-item">Dirección asistida:</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <hr class="mt-2 mx-3" />
+
+      <div class="mx-auto w-75 d-flex justify-items-center py-3 flex-column">
+        <h1 class="fs-5">Comentarios</h1>
+
+        <div>
+          <div
+            class="media w-50 mb-3"
+            v-for="comentario in comentariosResena"
+            :key="comentario.id"
+          >
+            <img
+              src="https://therichpost.com/wp-content/uploads/2020/06/avatar2.png"
+              alt="user"
+              width="50"
+              class="rounded-circle"
+            />
+            <small class="text-muted text fs-6 mx-3">{{
+              comentario.nombre
+            }}</small>
+            <div class="media-body ml-3 mt-2 d-flex gap-2 align-items-center">
+              <div
+                class="bg-light rounded py-2 px-3 mb-2"
+                v-if="comentario.mensaje != ''"
+              >
+                <p class="text-small mb-0 text-muted">{{ comentario.mensaje }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex flex-row gap-2 mt-3">
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Escribe un comentario"
+            v-model="comentario"
+          />
+          <button class="btn btn-danger" type="button" @click="sendComentario">
+            Enviar
+          </button>
+        </div>
+      </div>
+
+      <hr class="mt-2 mx-3" />
 
       <div class="subforos">
         <div class="d-grid justify-content-center mx-auto gap-3">
@@ -607,7 +1034,9 @@ export default {
               width="50"
               class="rounded-circle"
             />
-            <small class="text-muted text fs-6 mx-3">{{ comentario.nombre }}</small>
+            <small class="text-muted text fs-6 mx-3">{{
+              comentario.nombre
+            }}</small>
             <div class="media-body ml-3 mt-2 d-flex gap-2 align-items-center">
               <div
                 class="bg-light rounded py-2 px-3 mb-2"
@@ -680,7 +1109,7 @@ export default {
                     width="30"
                     class="rounded-circle"
                   />
-                  <small class="text-muted mx-3  fs-6"
+                  <small class="text-muted mx-3 fs-6"
                     >{{ replica.nombre }} : Replica a
                     {{ comentario.nombre }}</small
                   >
@@ -794,12 +1223,27 @@ export default {
             Enviar
           </button>
         </div>
+
+        <div class="p-2 imagenseleccionada" v-if="messageFile != null">
+          <span class="material-symbols-outlined"> imagesmode </span>
+          <p>
+            Imagen seleccionada:
+            {{ messageFile.name }}
+          </p>
+        </div>
       </div>
     </div>
   </div>
 </template>
 
 <style scoped>
+.imagenseleccionada {
+  display: grid;
+  grid-template-columns: 1fr;
+  text-align: center;
+  align-items: center;
+}
+
 .comentarios {
   width: 90%;
   margin: 0px auto;
@@ -995,7 +1439,6 @@ small.justify-content-center {
   width: 2%;
 }
 
-
 .replica-box {
   margin-left: 50px;
   margin-top: 10px;
@@ -1006,5 +1449,4 @@ small.justify-content-center {
 .reply-image {
   height: 200px;
 }
-
 </style>
