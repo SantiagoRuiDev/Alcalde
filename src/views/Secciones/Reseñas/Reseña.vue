@@ -6,7 +6,7 @@ export default {
       URL: "http://localhost:3000/api/resenas/",
       URL_COMENTAR: "http://localhost:3000/api/resenas/comentario/",
       URL_SUBFORO: "http://localhost:3000/api/subforo/",
-      URL_CALIFICAR: "http://localhost:3000/api/calificaciones/crear",
+      URL_CALIFICAR: "http://localhost:3000/api/calificaciones",
       URL_STRIKES: "http://localhost:3000/api/strikes/sancionar/",
       loading: true,
       cantidadVotos: 0,
@@ -22,6 +22,21 @@ export default {
       message: "",
       comentariosResena: [],
       comentario: "",
+      motor: [],
+      chasis: [],
+      perfomance: [],
+      medidas: [],
+      seguridad: [],
+      entretenimiento: [],
+      confort: [],
+      calificaciones: {
+        gasolina: 0,
+        confiabilidad: 0,
+        confort: 0,
+        diseno: 0,
+        manejo: 0,
+        total: 0,
+      },
     };
   },
 
@@ -127,10 +142,49 @@ export default {
           this.cantidadVotos = response.data.calif.length;
           this.carreteImages = response.data.resena[2];
           this.comentariosResena = response.data.comentarios;
+
+          this.motor = response.data.motor;
+          this.chasis = response.data.chasis;
+          this.perfomance = response.data.perfomance;
+          this.medidas = response.data.capacidades;
+          this.seguridad = response.data.seguridad;
+          this.entretenimiento = response.data.entretenimiento;
+          this.confort = response.data.confort;
+
+          this.calcularCalificaciones(response.data.calif);
         })
         .catch((err) => {
           console.log(err);
         });
+    },
+
+    calcularCalificaciones(x) {
+      // Realizar el cálculo de 5 estrellas en base a cada calificación dentro del arreglo
+
+      let gasolina = 0;
+      let confiabilidad = 0;
+      let confort = 0;
+      let diseno = 0;
+      let manejo = 0;
+
+      x.forEach((calificacion) => {
+        gasolina += calificacion.gasolina;
+        confiabilidad += calificacion.confiabilidad;
+        confort += calificacion.confort;
+        diseno += calificacion.diseno;
+        manejo += calificacion.manejo;
+      });
+
+      // Calcular promedio
+      this.calificaciones.gasolina = Math.min(5, gasolina / x.length);
+      this.calificaciones.confiabilidad = Math.min(5, confiabilidad / x.length);
+      this.calificaciones.confort = Math.min(5, confort / x.length);
+      this.calificaciones.diseno = Math.min(5, diseno / x.length);
+      this.calificaciones.manejo = Math.min(5, manejo / x.length);
+
+      this.calificaciones.total = this.calificaciones.gasolina + this.calificaciones.confiabilidad + this.calificaciones.confort + this.calificaciones.diseno + this.calificaciones.manejo;
+
+      this.calificaciones.total = Math.min(5, this.calificaciones.total / 5);
     },
 
     deleteMessage(id) {
@@ -334,8 +388,12 @@ export default {
         });
     },
 
-    calificarResena(id, caf) {
-      let data = { id_resena: id, calificacion: caf };
+    calificarResena(puntaje, tipo) {
+      let data = {
+        id_resena: this.$route.params.id,
+        puntaje: puntaje,
+        tipo: tipo,
+      };
       this.axios
         .post(this.URL_CALIFICAR, data, {
           headers: {
@@ -349,6 +407,7 @@ export default {
             showConfirmButton: false,
             timer: 1500,
           });
+          this.getResena();
         })
         .catch((err) => {
           this.$swal.fire({
@@ -447,6 +506,13 @@ export default {
               allowfullscreen
             ></iframe>
           </div>
+          <div
+            class="carousel-item"
+            v-for="carrete in carreteImages"
+            :key="carrete.id"
+          >
+            <img :src="carrete.imagen" class="car-image" />
+          </div>
         </div>
         <button
           class="carousel-control-prev"
@@ -467,14 +533,6 @@ export default {
           <span class="visually-hidden">Next</span>
         </button>
       </div>
-      <div class="carrete">
-        <img
-          v-for="carrete in carreteImages"
-          :key="carrete.id"
-          :src="carrete.imagen"
-          class="imagen-carrete"
-        />
-      </div>
     </div>
 
     <div class="card-body pt-0 px-0">
@@ -484,63 +542,27 @@ export default {
         <small class="mt-1 fs-6 fw-bold text-center">{{ resena.titulo }}</small>
         <p>{{ resena.descripcion }}</p>
 
-        <div class="rate">
-          <input
-            type="radio"
-            id="star5"
-            name="rate"
-            value="5"
-            v-on:click="calificarResena(resena.id, 5)"
-          />
-          <label for="star5" title="text">5 stars</label>
-          <input
-            type="radio"
-            id="star4"
-            name="rate"
-            value="4"
-            v-on:click="calificarResena(resena.id, 4)"
-          />
-          <label for="star4" title="text">4 stars</label>
-          <input
-            type="radio"
-            id="star3"
-            name="rate"
-            value="3"
-            v-on:click="calificarResena(resena.id, 3)"
-          />
-          <label for="star3" title="text">3 stars</label>
-          <input
-            type="radio"
-            id="star2"
-            name="rate"
-            value="2"
-            v-on:click="calificarResena(resena.id, 2)"
-          />
-          <label for="star2" title="text">2 stars</label>
-          <input
-            type="radio"
-            id="star1"
-            name="rate"
-            value="1"
-            v-on:click="calificarResena(resena.id, 1)"
-          />
-          <label for="star1" title="text">1 star</label>
+        <div class="d-flex gap-2 w-3/4 mx-auto items-center text-center mb-2">
+          <span class="material-symbols-outlined text-center"> star </span>
+          <p class="fw-bold">{{ calificaciones.total }}</p>
         </div>
-
-        <div class="flex gap-2 w-3/4 mx-auto items-center text-center">
-          <span class="material-symbols-outlined fs-1 text-center"> star </span>
-          <p class="fw-bold">Calificaciones Otorgadas: {{ cantidadVotos }}</p>
-        </div>
+          <p class="fw-bold">{{ cantidadVotos }} Personas calificaron el vehiculo</p>
 
         <div class="d-flex gap-2 w-3/4 mx-auto items-center flex-row mb-5">
-          <div class="rate">
+          <div class="rate mb-4">
+            <div
+              class="d-flex justify-content-center gap-2 w-3/4 mx-auto items-center text-center"
+            >
+              <span class="material-symbols-outlined text-center"> star </span>
+              <p class="fw-bold">{{ calificaciones.gasolina }}</p>
+            </div>
             <p>Gasolina</p>
             <input
               type="radio"
               id="star5"
               name="rate"
               value="5"
-              v-on:click="calificarResena(resena.id, 5)"
+              v-on:click="calificarResena(5, 1)"
             />
             <label for="star5" title="text">5 stars</label>
             <input
@@ -548,7 +570,7 @@ export default {
               id="star4"
               name="rate"
               value="4"
-              v-on:click="calificarResena(resena.id, 4)"
+              v-on:click="calificarResena(4, 1)"
             />
             <label for="star4" title="text">4 stars</label>
             <input
@@ -556,7 +578,7 @@ export default {
               id="star3"
               name="rate"
               value="3"
-              v-on:click="calificarResena(resena.id, 3)"
+              v-on:click="calificarResena(3, 1)"
             />
             <label for="star3" title="text">3 stars</label>
             <input
@@ -564,7 +586,7 @@ export default {
               id="star2"
               name="rate"
               value="2"
-              v-on:click="calificarResena(resena.id, 2)"
+              v-on:click="calificarResena(2, 1)"
             />
             <label for="star2" title="text">2 stars</label>
             <input
@@ -572,181 +594,205 @@ export default {
               id="star1"
               name="rate"
               value="1"
-              v-on:click="calificarResena(resena.id, 1)"
+              v-on:click="calificarResena(1, 1)"
             />
             <label for="star1" title="text">1 star</label>
           </div>
-          <div class="rate">
+          <div class="rate mb-4">
+            <div
+              class="d-flex justify-content-center gap-2 w-3/4 mx-auto items-center text-center"
+            >
+              <span class="material-symbols-outlined text-center"> star </span>
+              <p class="fw-bold">{{ calificaciones.confiabilidad }}</p>
+            </div>
             <p>Confiabilidad</p>
             <input
               type="radio"
-              id="star5"
+              id="starConfibialidad5"
               name="rate"
               value="5"
-              v-on:click="calificarResena(resena.id, 5)"
+              v-on:click="calificarResena(5, 2)"
             />
-            <label for="star5" title="text">5 stars</label>
+            <label for="starConfibialidad5" title="text">5 stars</label>
             <input
               type="radio"
-              id="star4"
+              id="starConfibialidad4"
               name="rate"
               value="4"
-              v-on:click="calificarResena(resena.id, 4)"
+              v-on:click="calificarResena(4, 2)"
             />
-            <label for="star4" title="text">4 stars</label>
+            <label for="starConfibialidad4" title="text">4 stars</label>
             <input
               type="radio"
-              id="star3"
+              id="starConfibialidad3"
               name="rate"
               value="3"
-              v-on:click="calificarResena(resena.id, 3)"
+              v-on:click="calificarResena(3, 2)"
             />
-            <label for="star3" title="text">3 stars</label>
+            <label for="starConfibialidad3" title="text">3 stars</label>
             <input
               type="radio"
-              id="star2"
+              id="starConfibialidad2"
               name="rate"
               value="2"
-              v-on:click="calificarResena(resena.id, 2)"
+              v-on:click="calificarResena(2, 2)"
             />
-            <label for="star2" title="text">2 stars</label>
+            <label for="starConfibialidad2" title="text">2 stars</label>
             <input
               type="radio"
-              id="star1"
+              id="starConfibialidad1"
               name="rate"
               value="1"
-              v-on:click="calificarResena(resena.id, 1)"
+              v-on:click="calificarResena(1, 2)"
             />
-            <label for="star1" title="text">1 star</label>
+            <label for="starConfibialidad1" title="text">1 star</label>
           </div>
-          <div class="rate">
+          <div class="rate mb-4">
+            <div
+              class="d-flex justify-content-center gap-2 w-3/4 mx-auto items-center text-center"
+            >
+              <span class="material-symbols-outlined text-center"> star </span>
+              <p class="fw-bold">{{ calificaciones.confort }}</p>
+            </div>
             <p>Confort</p>
             <input
               type="radio"
-              id="star5"
+              id="starConfort5"
               name="rate"
               value="5"
-              v-on:click="calificarResena(resena.id, 5)"
+              v-on:click="calificarResena(5, 3)"
             />
-            <label for="star5" title="text">5 stars</label>
+            <label for="starConfort5" title="text">5 stars</label>
             <input
               type="radio"
-              id="star4"
+              id="starConfort4"
               name="rate"
               value="4"
-              v-on:click="calificarResena(resena.id, 4)"
+              v-on:click="calificarResena(4, 3)"
             />
-            <label for="star4" title="text">4 stars</label>
+            <label for="starConfort4" title="text">4 stars</label>
             <input
               type="radio"
-              id="star3"
+              id="starConfort3"
               name="rate"
               value="3"
-              v-on:click="calificarResena(resena.id, 3)"
+              v-on:click="calificarResena(3, 3)"
             />
-            <label for="star3" title="text">3 stars</label>
+            <label for="starConfort3" title="text">3 stars</label>
             <input
               type="radio"
-              id="star2"
+              id="starConfort2"
               name="rate"
               value="2"
-              v-on:click="calificarResena(resena.id, 2)"
+              v-on:click="calificarResena(2, 3)"
             />
-            <label for="star2" title="text">2 stars</label>
+            <label for="starConfort2" title="text">2 stars</label>
             <input
               type="radio"
-              id="star1"
+              id="starConfort1"
               name="rate"
               value="1"
-              v-on:click="calificarResena(resena.id, 1)"
+              v-on:click="calificarResena(1, 3)"
             />
-            <label for="star1" title="text">1 star</label>
+            <label for="starConfort1" title="text">1 star</label>
           </div>
-          <div class="rate">
+          <div class="rate mb-4">
+            <div
+              class="d-flex justify-content-center gap-2 w-3/4 mx-auto items-center text-center"
+            >
+              <span class="material-symbols-outlined text-center"> star </span>
+              <p class="fw-bold">{{ calificaciones.diseno }}</p>
+            </div>
             <p>Diseño</p>
             <input
               type="radio"
-              id="star5"
+              id="starDiseno5"
               name="rate"
               value="5"
-              v-on:click="calificarResena(resena.id, 5)"
+              v-on:click="calificarResena(5, 4)"
             />
-            <label for="star5" title="text">5 stars</label>
+            <label for="starDiseno5" title="text">5 stars</label>
             <input
               type="radio"
-              id="star4"
+              id="starDiseno4"
               name="rate"
               value="4"
-              v-on:click="calificarResena(resena.id, 4)"
+              v-on:click="calificarResena(4, 4)"
             />
-            <label for="star4" title="text">4 stars</label>
+            <label for="starDiseno4" title="text">4 stars</label>
             <input
               type="radio"
-              id="star3"
+              id="starDiseno3"
               name="rate"
               value="3"
-              v-on:click="calificarResena(resena.id, 3)"
+              v-on:click="calificarResena(3, 4)"
             />
-            <label for="star3" title="text">3 stars</label>
+            <label for="starDiseno3" title="text">3 stars</label>
             <input
               type="radio"
-              id="star2"
+              id="starDiseno2"
               name="rate"
               value="2"
-              v-on:click="calificarResena(resena.id, 2)"
+              v-on:click="calificarResena(2, 4)"
             />
-            <label for="star2" title="text">2 stars</label>
+            <label for="starDiseno2" title="text">2 stars</label>
             <input
               type="radio"
-              id="star1"
+              id="starDiseno1"
               name="rate"
               value="1"
-              v-on:click="calificarResena(resena.id, 1)"
+              v-on:click="calificarResena(1, 4)"
             />
-            <label for="star1" title="text">1 star</label>
+            <label for="starDiseno1" title="text">1 star</label>
           </div>
-          <div class="rate">
+          <div class="rate mb-4">
+            <div
+              class="d-flex justify-content-center gap-2 w-3/4 mx-auto items-center text-center"
+            >
+              <span class="material-symbols-outlined text-center"> star </span>
+              <p class="fw-bold">{{ calificaciones.manejo }}</p>
+            </div>
             <p>Manejo</p>
             <input
               type="radio"
-              id="star5"
+              id="starManejo5"
               name="rate"
               value="5"
-              v-on:click="calificarResena(resena.id, 5)"
+              v-on:click="calificarResena(5, 5)"
             />
-            <label for="star5" title="text">5 stars</label>
+            <label for="starManejo5" title="text">5 stars</label>
             <input
               type="radio"
-              id="star4"
+              id="starManejo4"
               name="rate"
               value="4"
-              v-on:click="calificarResena(resena.id, 4)"
+              v-on:click="calificarResena(4, 5)"
             />
-            <label for="star4" title="text">4 stars</label>
+            <label for="starManejo4" title="text">4 stars</label>
             <input
               type="radio"
-              id="star3"
+              id="starManejo3"
               name="rate"
               value="3"
-              v-on:click="calificarResena(resena.id, 3)"
+              v-on:click="calificarResena(3, 5)"
             />
-            <label for="star3" title="text">3 stars</label>
+            <label for="starManejo3" title="text">3 stars</label>
             <input
               type="radio"
-              id="star2"
+              id="starManejo2"
               name="rate"
               value="2"
-              v-on:click="calificarResena(resena.id, 2)"
+              v-on:click="calificarResena(2, 5)"
             />
-            <label for="star2" title="text">2 stars</label>
+            <label for="starManejo2" title="text">2 stars</label>
             <input
               type="radio"
-              id="star1"
+              id="starManejo1"
               name="rate"
               value="1"
-              v-on:click="calificarResena(resena.id, 1)"
+              v-on:click="calificarResena(1, 5)"
             />
-            <label for="star1" title="text">1 star</label>
+            <label for="starManejo1" title="text">1 star</label>
           </div>
         </div>
       </div>
@@ -784,7 +830,7 @@ export default {
         <div class="d-flex flex-row justify-content-between px-3 pb-4">
           <div class="d-flex flex-column">
             <span class="text-muted">Combustible</span
-            ><small class="text-muted fs-6">{{ detalle.combustible }}</small>
+            ><small class="text-muted fs-6">{{ motor[0].combustible }}</small>
           </div>
         </div>
         <div class="d-flex flex-row justify-content-between px-3 pb-4">
@@ -796,13 +842,13 @@ export default {
         <div class="d-flex flex-row justify-content-between px-3 pb-4">
           <div class="d-flex flex-column">
             <span class="text-muted">Transmision</span
-            ><small class="text-muted fs-6">{{ detalle.transmision }}</small>
+            ><small class="text-muted fs-6">{{ chasis[0].tranmision }}</small>
           </div>
         </div>
         <div class="d-flex flex-row justify-content-between px-3 pb-4">
           <div class="d-flex flex-column">
             <span class="text-muted">Motor</span
-            ><small class="text-muted fs-6">{{ detalle.motor }}</small>
+            ><small class="text-muted fs-6">{{ motor[0].cilindros }}</small>
           </div>
         </div>
       </div>
@@ -829,18 +875,20 @@ export default {
               id="flush-collapseOne"
               class="accordion-collapse collapse"
               aria-labelledby="flush-headingOne"
+              v-for="motor in motor"
+              :key="motor.id"
               data-bs-parent="#accordionFlushExample"
             >
               <div class="accordion-body">
                 <!-- Some borders are removed -->
                 <ul class="list-group list-group-flush">
-                  <li class="list-group-item">Combustible:</li>
-                  <li class="list-group-item">Potencia:</li>
-                  <li class="list-group-item">Torque:</li>
-                  <li class="list-group-item">Cilindros:</li>
-                  <li class="list-group-item">Valvulas:</li>
-                  <li class="list-group-item">Alimentacion:</li>
-                  <li class="list-group-item">Sistema start/stop:</li>
+                  <li class="list-group-item">Combustible: {{ motor.combustible }}</li>
+                  <li class="list-group-item">Potencia: {{ motor.potencia }}</li>
+                  <li class="list-group-item">Torque: {{ motor.torque }}</li>
+                  <li class="list-group-item">Cilindros: {{ motor.cilindros }}</li>
+                  <li class="list-group-item">Valvulas: {{ motor.valvulas }}</li>
+                  <li class="list-group-item">Alimentacion: {{ motor.alimentacion }}</li>
+                  <li class="list-group-item">Sistema start/stop: {{ motor.sistema }}</li>
                 </ul>
               </div>
             </div>
@@ -869,15 +917,17 @@ export default {
               class="accordion-collapse collapse"
               aria-labelledby="flush-headingTwo"
               data-bs-parent="#accordionFlushExample"
+              v-for="perfomance in perfomance"
+              :key="perfomance.id"
             >
               <div class="accordion-body">
                 <!-- Some borders are removed -->
                 <ul class="list-group list-group-flush">
-                  <li class="list-group-item">Aceleracion 0-100km:</li>
-                  <li class="list-group-item">Velocidad Maxima:</li>
-                  <li class="list-group-item">Rendimiento en ciudad:</li>
-                  <li class="list-group-item">Rendimiento en ruta:</li>
-                  <li class="list-group-item">Rendimiento mixto:</li>
+                  <li class="list-group-item">Aceleracion 0-100km: {{ perfomance.aceleracion }}</li>
+                  <li class="list-group-item">Velocidad Maxima: {{ perfomance.velocidad }}</li>
+                  <li class="list-group-item">Rendimiento en ciudad: {{ perfomance.rendimientociudad }}</li>
+                  <li class="list-group-item">Rendimiento en ruta: {{ perfomance.rendimientoruta }}</li>
+                  <li class="list-group-item">Rendimiento mixto: {{ perfomance.rendimientomixto }}</li>
                 </ul>
               </div>
             </div>
@@ -906,20 +956,224 @@ export default {
               class="accordion-collapse collapse"
               aria-labelledby="flush-headingThree"
               data-bs-parent="#accordionFlushExample"
+              v-for="chasis in chasis"
+              :key="chasis.id"
             >
               <div class="accordion-body">
                 <!-- Some borders are removed -->
                 <ul class="list-group list-group-flush">
-                  <li class="list-group-item">Motor (posición):</li>
-                  <li class="list-group-item">Traccion:</li>
-                  <li class="list-group-item">Transmisión:</li>
+                  <li class="list-group-item">Motor (posición): {{ chasis.motor }}</li>
+                  <li class="list-group-item">Traccion: {{ chasis.traccion }}</li>
+                  <li class="list-group-item">Transmisión: {{ chasis.tranmision }}</li>
                   <li class="list-group-item">
-                    Frenos (Delanteros y traseros):
+                    Frenos (Delanteros y traseros):  {{ chasis.frenos }}
                   </li>
-                  <li class="list-group-item">Neumáticos:</li>
-                  <li class="list-group-item">Suspensión delantera:</li>
-                  <li class="list-group-item">Suspensión trasera:</li>
-                  <li class="list-group-item">Dirección asistida:</li>
+                  <li class="list-group-item">Neumáticos:  {{ chasis.neumaticos }}</li>
+                  <li class="list-group-item">Suspensión delantera:  {{ chasis.suspdelantero }}</li>
+                  <li class="list-group-item">Suspensión trasera:  {{ chasis.susptrasera }}</li>
+                  <li class="list-group-item">Dirección asistida:  {{ chasis.direccion }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        
+        <div
+          class="accordion accordion-flush w-75 mx-auto"
+          id="accordionFlushExample"
+        >
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="flush-headingFour">
+              <button
+                class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#flush-collapseFour"
+                aria-expanded="true"
+                aria-controls="flush-collapseFour"
+              >
+                Medidas y capacidades
+              </button>
+            </h2>
+            <div
+              id="flush-collapseFour"
+              class="accordion-collapse collapse"
+              aria-labelledby="flush-headingFour"
+              data-bs-parent="#accordionFlushExample"
+              v-for="medidas in medidas"
+              :key="medidas.id"
+            >
+              <div class="accordion-body">
+                <!-- Some borders are removed -->
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item">Largo: {{ medidas.largo }}</li>
+                  <li class="list-group-item">Alto: {{ medidas.alto }}</li>
+                  <li class="list-group-item">Ancho: {{ medidas.ancho }}</li>
+                  <li class="list-group-item">
+                    Distancia entre ejes: {{ medidas.distanciaejes }}
+                  </li>
+                  <li class="list-group-item">Cajuela: {{ medidas.cajuela }}</li>
+                  <li class="list-group-item">Tanque de combustible: {{ medidas.tanque }}</li>
+                  <li class="list-group-item">Peso: {{ medidas.peso }}</li>
+                  <li class="list-group-item">Capacidad de carga: {{ medidas.capacidadcarga }}</li>
+                  <li class="list-group-item">Altura de piso: {{ medidas.alturapiso }}</li>
+                  <li class="list-group-item">Capacidad de vadeo: {{ medidas.capacidadvadeo }}</li>
+                  <li class="list-group-item">Ángulo de ataque: {{ medidas.anguloataque }}</li>
+                  <li class="list-group-item">Ángulo de partida: {{ medidas.angulopartida }}</li>
+                  <li class="list-group-item">Ángulo ventral: {{ medidas.anguloventral }}</li>
+                  <li class="list-group-item">Remolque con frenos: {{ medidas.remolque }}</li>
+                  <li class="list-group-item">Escalonamiento vertical: {{ medidas.escalonamiento }}</li>
+                  <li class="list-group-item">Inclinacion lateral: {{ medidas.inclinacion }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        
+        <div
+          class="accordion accordion-flush w-75 mx-auto"
+          id="accordionFlushExample"
+        >
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="flush-headingFour">
+              <button
+                class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#flush-collapseFive"
+                aria-expanded="true"
+                aria-controls="flush-collapseFive"
+              >
+                Seguridad
+              </button>
+            </h2>
+            <div
+              id="flush-collapseFive"
+              class="accordion-collapse collapse"
+              aria-labelledby="flush-headingFive"
+              data-bs-parent="#accordionFlushExample"
+              v-for="seguridad in seguridad"
+              :key="seguridad.id"
+            >
+              <div class="accordion-body">
+                <!-- Some borders are removed -->
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item">Airbag: {{ seguridad.airbag }}</li>
+                  <li class="list-group-item">ABS: {{ seguridad.abs }}</li>
+                  <li class="list-group-item">Distribucion Electronica de Frenado: {{ seguridad.distfrenado }}</li>
+                  <li class="list-group-item">
+                    Asistencia en frenada de emergencia: {{ seguridad.asistfrenado }}
+                  </li>
+                  <li class="list-group-item">Alarma e inmovilizador de motor: {{ seguridad.alarma }}</li>
+                  <li class="list-group-item">Anclaje para asientos infantiles: {{ seguridad.anclaje }}</li>
+                  <li class="list-group-item">Cinturones de seguridad: {{ seguridad.cinturones }}</li>
+                  <li class="list-group-item">Otros (especificar): {{ seguridad.otros }}</li>
+                  <li class="list-group-item">Sensor de lluvia: {{ seguridad.sensor }}</li>
+                  <li class="list-group-item">Tercera luz de stop: {{ seguridad.terceraluz }}</li>
+                  <li class="list-group-item">Autobloqueo de puertas con velocidad: {{ seguridad.autobloqueo }}</li>
+                  <li class="list-group-item">Control de estabilidad: {{ seguridad.controlestabilidad }}</li>
+                  <li class="list-group-item">Control de tracción:  {{ seguridad.controltraccion }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        
+        <div
+          class="accordion accordion-flush w-75 mx-auto"
+          id="accordionFlushExample"
+        >
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="flush-headingFour">
+              <button
+                class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#flush-collapseSix"
+                aria-expanded="true"
+                aria-controls="flush-collapseSix"
+              >
+                Comunicacion y entretenimiento
+              </button>
+            </h2>
+            <div
+              id="flush-collapseSix"
+              class="accordion-collapse collapse"
+              aria-labelledby="flush-headingSix"
+              data-bs-parent="#accordionFlushExample"
+              v-for="entretenimiento in entretenimiento"
+              :key="entretenimiento.id"
+            >
+              <div class="accordion-body">
+                <!-- Some borders are removed -->
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item">Equipo de música: {{ entretenimiento.musica }}</li>
+                  <li class="list-group-item">Bocinas: {{ entretenimiento.bocinas }}</li>
+                  <li class="list-group-item">Conexión auxiliar: {{ entretenimiento.conex }}</li>
+                  <li class="list-group-item">
+                    Interfaz bluetooth: {{ entretenimiento.bluetooth }}
+                  </li>
+                  <li class="list-group-item">Pantalla en tablero: {{ entretenimiento.tablero }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        
+        
+        <div
+          class="accordion accordion-flush w-75 mx-auto"
+          id="accordionFlushExample"
+        >
+          <div class="accordion-item">
+            <h2 class="accordion-header" id="flush-headingFour">
+              <button
+                class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#flush-collapseSeven"
+                aria-expanded="true"
+                aria-controls="flush-collapseSeven"
+              >
+                Confort
+              </button>
+            </h2>
+            <div
+              id="flush-collapseSeven"
+              class="accordion-collapse collapse"
+              aria-labelledby="flush-headingSeven"
+              data-bs-parent="#accordionFlushExample"
+              v-for="confort in confort"
+              :key="confort.id"
+            >
+              <div class="accordion-body">
+                <!-- Some borders are removed -->
+                <ul class="list-group list-group-flush">
+                  <li class="list-group-item">Aire acondicionado: {{ confort.aire }}</li>
+                  <li class="list-group-item">Asientos delanteros: {{ confort.asientosd }}</li>
+                  <li class="list-group-item">Asientos traseros: {{ confort.asientost }}</li>
+                  <li class="list-group-item">
+                    Cierre de puertas: {{ confort.cierre }}
+                  </li>
+                  <li class="list-group-item">Computadora de a bordo: {{ confort.computadora }}</li>
+                  <li class="list-group-item">Espejo interior: {{ confort.espejoi }}</li>
+                  <li class="list-group-item">Espejos exteriores: {{ confort.espejoe }}</li>
+                  <li class="list-group-item">Faros antiniebla: {{ confort.farosniebla }}</li>
+                  <li class="list-group-item">Faros delanteros: {{ confort.farosdelanteros }}</li>
+                  <li class="list-group-item">Palanca de cambios: {{ confort.palanca }}</li>
+                  <li class="list-group-item">Quemacocos: {{ confort.quemacocos }}</li>
+                  <li class="list-group-item">Rines: {{ confort.rines }}</li>
+                  <li class="list-group-item">Vestiduras: {{ confort.vestiduras }}</li>
+                  <li class="list-group-item">Control de velocidad crucero: {{ confort.crucero }}</li>
+                  <li class="list-group-item">Vidrios (delanteros y traseros): {{ confort.vidrios }}</li>
+                  <li class="list-group-item">Volante: {{ confort.volante }}</li>
+                  <li class="list-group-item">Apertura cajuela y tapa combustible: {{ confort.cajuela }}</li>
+                  <li class="list-group-item">Sensor de estacionamiento: {{ confort.sensor }}</li>
+                  <li class="list-group-item">Cámara de visión trasera: {{ confort.camara }}</li>
                 </ul>
               </div>
             </div>
@@ -952,7 +1206,9 @@ export default {
                 class="bg-light rounded py-2 px-3 mb-2"
                 v-if="comentario.mensaje != ''"
               >
-                <p class="text-small mb-0 text-muted">{{ comentario.mensaje }}</p>
+                <p class="text-small mb-0 text-muted">
+                  {{ comentario.mensaje }}
+                </p>
               </div>
             </div>
           </div>
@@ -1305,30 +1561,8 @@ iframe {
   flex-direction: row;
   gap: 15px;
   height: 500px;
-  justify-content: space-between;
-}
-
-.imagen-principal {
-  height: 500px;
-  width: 70%;
-  border-top-left-radius: 5px;
-  border-top-right-radius: 25px;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 25px;
-}
-
-.carrete {
-  display: grid;
-  gap: 5px;
-  padding: 5px;
   overflow-y: scroll;
-}
-
-.imagen-carrete {
-  height: 200px;
-  width: 100%;
-  border: none;
-  border-radius: 25px;
+  justify-content: center;
 }
 
 @media only screen and (max-width: 600px) {
@@ -1348,13 +1582,6 @@ iframe {
     border-top-right-radius: 5px;
     border-bottom-left-radius: 5px;
     border-bottom-right-radius: 5px;
-  }
-
-  .carrete {
-    display: flex;
-    flex-direction: row;
-    overflow-y: hidden;
-    overflow-x: scroll;
   }
 }
 
@@ -1436,7 +1663,8 @@ small.justify-content-center {
 
 .carousel-control-next,
 .carousel-control-prev {
-  width: 2%;
+  width: 12%;
+  opacity: 1;
 }
 
 .replica-box {
@@ -1448,5 +1676,10 @@ small.justify-content-center {
 
 .reply-image {
   height: 200px;
+}
+
+.car-image {
+  height: 100%;
+  width: 100%;
 }
 </style>

@@ -33,7 +33,6 @@
               >
                 <span
                   class="material-symbols-outlined"
-                  @click="replyMessage(mensaje.id)"
                 >
                   reply
                 </span>
@@ -66,7 +65,6 @@
               >
                 <span
                   class="material-symbols-outlined"
-                  @click="deleteMessage(mensaje.id)"
                 >
                   delete
                 </span>
@@ -78,7 +76,6 @@
               >
                 <span
                   class="material-symbols-outlined"
-                  @click="strikeUsuario(mensaje.id_usuario)"
                 >
                   warning
                 </span>
@@ -123,7 +120,6 @@
                     >
                       <span
                         class="material-symbols-outlined"
-                        @click="deleteReply(replica.id)"
                       >
                         delete
                       </span>
@@ -135,7 +131,6 @@
                     >
                       <span
                         class="material-symbols-outlined"
-                        @click="strikeUsuario(replica.id_usuario)"
                       >
                         warning
                       </span>
@@ -254,10 +249,12 @@
 </style>
 
 <script>
+import { socket } from "@/socket.js";
+import { state } from "@/socket.js";
 export default {
   data() {
     return {
-      mensajes: [],
+      mensajes: state.messages.foro,
       mensaje: "",
       reply: false,
       replyId: null,
@@ -265,8 +262,9 @@ export default {
       data: new FormData(),
       selectedFile: null,
       likes: [],
+      savedFile: {filename: "", path: ""},
       URL_STRIKES: "http://localhost:3000/api/strikes/sancionar/",
-      URL_LISTAR: "http://localhost:3000/api/foros/",
+      URL_SUBIR: "http://localhost:3000/api/chat/upload",
       URL_CREAR: "http://localhost:3000/api/foros/crear/mensaje/",
       URL_REPLY: "http://localhost:3000/api/foros/crear/reply/",
       URL_LIKE: "http://localhost:3000/api/foros/crear/like/",
@@ -274,27 +272,63 @@ export default {
       URL_ELIMINAR_REPLY: "http://localhost:3000/api/foros/delete/reply/",
     };
   },
-  created: function () {
-    this.cargarMensajes();
+  created: async function () {
+    await this.cargarMensajes();
+    await this.fetchMessages();
+    await this.saveImageLink();
   },
   methods: {
     changeFile(event) {
       this.selectedFile = event.target.files[0];
-    },
 
-    cargarMensajes() {
+      if(this.savedFile.path != ""){
+        socket.emit("imageDelete", {
+          path: this.savedFile.path,
+        });
+      }
+
+      this.data.delete("file");
+      this.data.append("file", this.selectedFile);
+
       this.axios
-        .get(this.URL_LISTAR + this.$route.params.id, {
+        .post(this.URL_SUBIR, this.data, {
           headers: {
             "x-access-token": this.$store.getters.getUserToken,
           },
         })
         .then((response) => {
-          this.mensajes = response.data[0];
-          this.replicas = response.data[1];
-          this.likes = response.data[2];
-          this.ordenarMensajes();
+          return;
+        })
+        .catch((error) => {
+          console.log(error)
+          this.$swal.fire({
+            icon: "error",
+            title: "Oops...",
+            text: "Error al subir la imagen",
+          });
         });
+    },
+
+    async saveImageLink(){
+      socket.on("image", (data) => {
+        this.savedFile.filename = data.filename;
+        this.savedFile.path = data.path;
+      })
+    },
+
+    async fetchMessages(){
+      socket.on("joinForo", (messages) => {
+        this.mensajes = messages.foro[0];
+        this.replicas = messages.foro[1];
+        this.likes = messages.foro[2];
+        this.ordenarMensajes();
+      })
+    },
+
+    async cargarMensajes() {
+      socket.emit("joinForo", {
+        room: this.$route.params.id,
+      });
     },
 
     async strikeUsuario(id) {
@@ -330,19 +364,11 @@ export default {
     },
 
     deleteMessage(id) {
-      this.axios
-        .post(
-          this.URL_ELIMINAR + id,
-          {},
-          {
-            headers: {
-              "x-access-token": this.$store.getters.getUserToken,
-            },
-          }
-        )
-        .then((response) => {
-          this.cargarMensajes();
-        });
+      socket.emit("deleteMessage", {
+        token: this.$store.getters.getUserToken,
+        id_mensaje: id,
+        room: this.$route.params.id,
+      });
     },
 
     likeMessage(mensaje) {
@@ -362,19 +388,11 @@ export default {
     },
 
     deleteReply(id) {
-      this.axios
-        .post(
-          this.URL_ELIMINAR_REPLY + id,
-          {},
-          {
-            headers: {
-              "x-access-token": this.$store.getters.getUserToken,
-            },
-          }
-        )
-        .then((response) => {
-          this.cargarMensajes();
-        });
+      socket.emit("deleteReply", {
+        token: this.$store.getters.getUserToken,
+        id_reply: id,
+        room: this.$route.params.id,
+      });
     },
 
     replyMessage(id) {
@@ -412,58 +430,25 @@ export default {
 
     crearMensaje() {
       if (this.reply) {
-        this.data.delete("mensaje");
-        this.data.delete("imagen");
-        this.data.delete("id_mensaje");
-        this.data.append("mensaje", this.mensaje);
-        this.data.append("id_mensaje", this.replyId);
-        this.data.append("imagen", this.selectedFile);
-        if (this.mensaje.trim() != "" || this.selectedFile != null) {
-          this.axios
-            .post(this.URL_REPLY + this.$route.params.id, this.data, {
-              headers: {
-                "x-access-token": this.$store.getters.getUserToken,
-              },
-            })
-            .then((response) => {
-              this.mensaje = "";
-              this.cargarMensajes();
-            })
-            .catch((error) => {
-              this.$swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text:
-                  error.response.data.message || "Error al crear el mensaje",
-              });
-            });
-        }
+        socket.emit("createReply", ({
+          room: this.$route.params.id,
+          text: this.mensaje,
+          file: this.savedFile,
+          token: this.$store.getters.getUserToken,
+          id_reply: this.replyId,
+        }))
       } else {
-        this.data.delete("mensaje");
-        this.data.delete("imagen");
-        this.data.append("mensaje", this.mensaje);
-        this.data.append("imagen", this.selectedFile);
-        if (this.mensaje.trim() != "" || this.selectedFile != null) {
-          this.axios
-            .post(this.URL_CREAR + this.$route.params.id, this.data, {
-              headers: {
-                "x-access-token": this.$store.getters.getUserToken,
-              },
-            })
-            .then((response) => {
-              this.mensaje = "";
-              this.cargarMensajes();
-            })
-            .catch((error) => {
-              this.$swal.fire({
-                icon: "error",
-                title: "Oops...",
-                text:
-                  error.response.data.message || "Error al crear el mensaje",
-              });
-            });
-        }
+        socket.emit("createMessage", ({
+          room: this.$route.params.id,
+          text: this.mensaje,
+          file: this.savedFile,
+          token: this.$store.getters.getUserToken,
+        }))
       }
+
+      this.mensaje = "";
+      this.savedFile = {filename: "", path: ""};
+      this.selectedFile = null;
     },
   },
 };

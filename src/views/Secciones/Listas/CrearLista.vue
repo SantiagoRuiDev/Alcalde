@@ -10,7 +10,7 @@ export default {
             resenasLista: [],
             listaPreview: false,
             param: "",
-            lista: {},
+            lista: {titulo: "", subtitulo: ""},
             URL_BUSCAR: "http://localhost:3000/api/resenas/buscar/",
             URL_INFO: "http://localhost:3000/api/resenas/info/",
             URL_CREAR: "http://localhost:3000/api/listas/crear/"
