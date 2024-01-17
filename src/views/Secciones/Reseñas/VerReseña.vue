@@ -6,6 +6,16 @@ export default {
     return {
       param: "",
       resenas: [],
+      rawResenas: [],
+      rawDetalles: [],
+      rawChasis: [],
+      filtros: {
+        precio: "",
+        etiqueta: "",
+        altura_piso: "",
+        ancho: "",
+        largo: "",
+      },
       URL: "http://localhost:3000/api/resenas/",
       URL_BUSCAR: "http://localhost:3000/api/resenas/buscar/",
       loading: true,
@@ -15,6 +25,58 @@ export default {
     this.cargarResenas();
   },
   methods: {
+
+
+    filtrar(){
+      let resenas = this.resenas;
+
+      // Filtrar por precio
+      if(this.filtros.precio != ""){
+        resenas = resenas.filter(resena => {
+          return resena.detalles[0].precioIni <= this.filtros.precio && resena.detalles[0].precioFin >= this.filtros.precio;
+        });
+      }
+
+      // Filtrar por etiqueta // Las etiquetas estan divididas por comas, por lo que se debe buscar si el string contiene la etiqueta
+      if(this.filtros.etiqueta != ""){
+        resenas = resenas.filter(resena => {
+          return resena.detalles[0].etiqueta.toLowerCase().includes(this.filtros.etiqueta.toLowerCase());
+        });
+      }
+
+      // Filtrar por altura del piso
+      if(this.filtros.altura_piso != ""){
+        resenas = resenas.filter(resena => {
+          return resena.chasis[0].altura_piso == this.filtros.altura_piso;
+        });
+      }
+
+      // Filtrar por ancho
+      if(this.filtros.ancho != ""){
+        resenas = resenas.filter(resena => {
+          return resena.chasis[0].ancho == this.filtros.ancho;
+        });
+      }
+
+      // Filtrar por largo
+      if(this.filtros.largo != ""){
+        resenas = resenas.filter(resena => {
+          return resena.chasis[0].largo == this.filtros.largo;
+        });
+      }
+
+      this.resenas = resenas;
+
+      if(this.resenas.length == 0){
+        this.$swal.fire("Error", "No se encontraron resultados", "error").then(() => {
+          this.orderResenas();
+        });
+      }
+    },
+
+
+  
+
     cargarResenas() {
       this.axios
         .get(this.URL, {
@@ -23,7 +85,12 @@ export default {
           },
         })
         .then((response) => {
-          this.resenas = response.data;
+          // Ordenar reseñas y estructurar
+          this.rawResenas = response.data[0];
+          this.rawDetalles = response.data[1];
+          this.rawChasis = response.data[2];
+
+          this.orderResenas();
 
           this.loading = response.data.length > 0 ? false : true;
         })
@@ -31,6 +98,74 @@ export default {
           console.log(error);
         });
     },
+
+    orderResenas(){
+      // Hay 3 arreglos raws, el de resenas, el de detalles y el de chasis.
+      // El de resena, contiene la informacion principal, el de detalles los detalles y el de chasis sus medidas.
+      /* El chasis tiene como referencia una clave resena_id, para saber a que resena pertenece,
+        La resena tiene un id_detalles para saber que detalles pertenencen.
+        Es necesario conectar todos los arreglos y crear un arreglo con objetos que contengan toda la informacion.
+      */
+
+      // Crear arreglo de objetos con toda la informacion
+      let resenas = [];
+
+      // Recorrer arreglo de resenas
+
+      this.rawResenas.forEach((resena) => {
+        // Crear objeto de resena
+        let resenaObj = {
+          id: resena.id,
+          titulo: resena.titulo,
+          descripcion: resena.descripcion,
+          imagen: resena.imagen,
+          id_usuario: resena.id_usuario,
+          detalles: [],
+          chasis: []
+        };
+
+        // Recorrer arreglo de detalles
+        this.rawDetalles.forEach((detalle) => {
+          // Si el id de detalles es igual al id de detalles de la resena
+          if (detalle.id == resena.id_detalles) {
+            // Crear objeto de detalles
+            let detalleObj = {
+              id: detalle.id,
+              precioIni: detalle.precio_inicial,
+              precioFin: detalle.precio_final,
+              etiqueta: detalle.etiquetas,
+            };
+
+            // Recorrer arreglo de chasis
+            this.rawChasis.forEach((chasis) => {
+              // Si el id de chasis es igual al id de chasis de detalles
+              if (chasis.resena_id == resena.id) {
+                // Crear objeto de chasis
+                let chasisObj = {
+                  id: chasis.id,
+                  altura_piso: chasis.alturapiso,
+                  ancho: chasis.ancho,
+                  largo: chasis.largo,
+                };
+
+                // Agregar chasis al arreglo de chasis
+                resenaObj.chasis.push(chasisObj);
+              }
+            });
+
+            // Agregar detalles al arreglo de detalles
+            resenaObj.detalles.push(detalleObj);
+          }
+        });
+
+        // Agregar resena al arreglo de resenas
+        resenas.push(resenaObj);
+
+        this.resenas = resenas;
+      });
+
+    },
+
     buscarResena() {
       if (this.param.trim() == "")
         return this.$swal.fire(
@@ -78,17 +213,54 @@ export default {
     <p class="card-heading">Filtros</p>
 
     <!-- checkbox -->
-    <div class="input-group mt-2 p-2">
+    <div class="input-group mt-2 p-2 d-flex gap-2">
       <div class="input-group-text d-flex gap-3">
+        <label for="filtro">Filtrar por Precio</label>
         <input
-          class="form-check-input mt-0"
-          type="checkbox"
+          class="form-control input mt-0"
+          type="number"
           id="filtro"
-          value=""
-          aria-label="Checkbox for following text input"
+          v-model="filtros.precio"
         />
-        <label for="filtro">Filtro de:</label>
       </div>
+      <div class="input-group-text d-flex gap-3">
+        <label for="filtro">Filtrar por Etiqueta</label>
+        <input
+          class="form-control input mt-0"
+          type="text"
+          id="filtro"
+          v-model="filtros.etiqueta"
+        />
+      </div>
+      <div class="input-group-text d-flex gap-3">
+        <label for="filtro">Filtrar por Altura del Piso</label>
+        <input
+          class="form-control input mt-0"
+          type="number"
+          id="filtro"
+          v-model="filtros.altura_piso"
+        />
+      </div>
+      <div class="input-group-text d-flex gap-3">
+        <label for="filtro">Filtrar por Ancho</label>
+        <input
+          class="form-control input mt-0"
+          type="number"
+          id="filtro"
+          v-model="filtros.ancho"
+        />
+      </div>
+      <div class="input-group-text d-flex gap-3">
+        <label for="filtro">Filtrar por Largo</label>
+        <input
+          class="form-control input mt-0"
+          type="number"
+          id="filtro"
+          v-model="filtros.largo"
+        />
+      </div>
+
+      <button class="btn btn-success text-center w-100 rounded" @click="filtrar">Filtrar Resultados</button>
     </div>
   </div>
 

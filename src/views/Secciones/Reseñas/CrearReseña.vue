@@ -807,6 +807,30 @@ export default {
                 />
               </div>
               <div class="mb-3">
+                <label for="" class="form-label"
+                  >Precio Inicial</label
+                >
+                <input
+                  type="number"
+                  class="form-control"
+                  aria-describedby="helpId"
+                  placeholder="Ejemplo: 45000"
+                  v-model="resena.inicial"
+                />
+              </div>
+              <div class="mb-3">
+                <label for="" class="form-label"
+                  >Precio Final</label
+                >
+                <input
+                  type="number"
+                  class="form-control"
+                  aria-describedby="helpId"
+                  placeholder="Ejemplo: 125000"
+                  v-model="resena.final"
+                />
+              </div>
+              <div class="mb-3">
                 <label for="" class="form-label">Video de Youtube</label>
                 <input
                   type="text"

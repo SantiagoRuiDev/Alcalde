@@ -276,8 +276,21 @@ export default {
     await this.cargarMensajes();
     await this.fetchMessages();
     await this.saveImageLink();
+    await this.catchErrors();
   },
   methods: {
+
+    async catchErrors(){
+      socket.on("error", (error) => {
+        this.$swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: error.message,
+        });
+
+        console.log(error)
+      })
+    },
     changeFile(event) {
       this.selectedFile = event.target.files[0];
 

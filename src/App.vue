@@ -36,8 +36,35 @@ export default {
                         }
                     });
             }
+            this.isBanned();
     }},
     methods: {
+        isBanned(){
+            const url = 'http://localhost:3000/api/usuario/banned';
+            const headers = { 'x-access-token': this.userToken }
+            axios.get(url, { headers })
+                .then(response => {
+                    if(response.data.banned){
+                        const Toast = this.$swal.mixin({
+                            toast: true,
+                            position: "top-end",
+                            showConfirmButton: false,
+                            timerProgressBar: true,
+                            didOpen: (toast) => {
+                                toast.onmouseenter = this.$swal.stopTimer;
+                                toast.onmouseleave = this.$swal.resumeTimer;
+                            }
+                            });
+                            Toast.fire({
+                            icon: "info",
+                            title: "Tu cuenta esta baneada, no puedes realizar acciones."
+                            });
+                    }
+                })
+                .catch(err => {
+                    console.log(err.response.data)
+                });
+        },
         getAdminSesion(){
             const url = 'http://localhost:3000/api/usuario/admin';
             const headers = { 'x-access-token': this.userToken }

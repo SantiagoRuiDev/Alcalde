@@ -1,5 +1,12 @@
 <script>
+import { socket } from "@/socket.js";
+import { state } from "@/socket.js";
+import Slider from "@/components/Slider.vue";
 export default {
+  name: "Resena",
+  components: {
+    Slider,
+  },
   data() {
     return {
       resenas: [],
@@ -40,11 +47,33 @@ export default {
     };
   },
 
-  created: function () {
-    this.getResena();
+  created: async function () {
+    await this.joinRoomResena();
+    await this.fetchChanges();
   },
 
   methods: {
+
+    async fetchChanges() {
+      socket.on("resenaUpdate", (id) => {
+        if (id == this.$route.params.id) {
+          this.getResena();
+          if(this.subforoSelected != -1){
+            
+              this.seeSubforo(this.$route.params.id, this.subforoSelected);
+          }
+        }
+      });
+    },
+
+    async notifyUsers(){
+      await socket.emit("resenaUpdate", this.$route.params.id);
+    },
+
+    async joinRoomResena() {
+      await socket.emit("joinResena", this.$route.params.id);
+    },
+
     handleFile(e) {
       this.messageFile = e.target.files[0];
     },
@@ -70,7 +99,7 @@ export default {
             timer: 1500,
           });
           this.comentario = "";
-          this.getResena();
+          this.notifyUsers();
         })
         .catch((error) => {
           this.$swal.fire({
@@ -182,7 +211,12 @@ export default {
       this.calificaciones.diseno = Math.min(5, diseno / x.length);
       this.calificaciones.manejo = Math.min(5, manejo / x.length);
 
-      this.calificaciones.total = this.calificaciones.gasolina + this.calificaciones.confiabilidad + this.calificaciones.confort + this.calificaciones.diseno + this.calificaciones.manejo;
+      this.calificaciones.total =
+        this.calificaciones.gasolina +
+        this.calificaciones.confiabilidad +
+        this.calificaciones.confort +
+        this.calificaciones.diseno +
+        this.calificaciones.manejo;
 
       this.calificaciones.total = Math.min(5, this.calificaciones.total / 5);
     },
@@ -206,6 +240,7 @@ export default {
             timer: 1500,
           });
           this.seeSubforo(this.$route.params.id, this.subforoSelected);
+          this.notifyUsers();
         })
         .catch((error) => {
           this.$swal.fire({
@@ -282,6 +317,7 @@ export default {
             this.message = "";
             this.messageFile = null;
             this.seeSubforo(this.$route.params.id, this.subforoSelected);
+             this.notifyUsers();
           })
           .catch((error) => {
             this.$swal.fire({
@@ -322,6 +358,7 @@ export default {
             this.message = "";
             this.messageFile = null;
             this.seeSubforo(this.$route.params.id, this.subforoSelected);
+          this.notifyUsers();
           })
           .catch((error) => {
             this.$swal.fire({
@@ -377,6 +414,7 @@ export default {
             timer: 1500,
           });
           this.seeSubforo(this.$route.params.id, this.subforoSelected);
+          this.notifyUsers();
         })
         .catch((error) => {
           this.$swal.fire({
@@ -408,6 +446,7 @@ export default {
             timer: 1500,
           });
           this.getResena();
+          this.notifyUsers();
         })
         .catch((err) => {
           this.$swal.fire({
@@ -438,6 +477,7 @@ export default {
             timer: 1500,
           });
           this.seeSubforo(this.$route.params.id, this.subforoSelected);
+          this.notifyUsers();
         })
         .catch((error) => {
           this.$swal.fire({
@@ -486,54 +526,7 @@ export default {
 
 <template>
   <div class="card mx-auto" v-for="resena in resenas" :key="resena.id">
-    <div class="imagenes">
-      <div id="carouselId" class="carousel slide" data-bs-ride="carousel">
-        <div class="carousel-inner" role="listbox">
-          <div class="carousel-item active">
-            <img
-              :src="resena.imagen"
-              class="imagen-principal First slide w-100"
-            />
-          </div>
-          <div class="carousel-item">
-            <iframe
-              height="500"
-              width="700"
-              :src="'https://www.youtube.com/embed/' + resena.video"
-              title="YouTube video player"
-              frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowfullscreen
-            ></iframe>
-          </div>
-          <div
-            class="carousel-item"
-            v-for="carrete in carreteImages"
-            :key="carrete.id"
-          >
-            <img :src="carrete.imagen" class="car-image" />
-          </div>
-        </div>
-        <button
-          class="carousel-control-prev"
-          type="button"
-          data-bs-target="#carouselId"
-          data-bs-slide="prev"
-        >
-          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Previous</span>
-        </button>
-        <button
-          class="carousel-control-next"
-          type="button"
-          data-bs-target="#carouselId"
-          data-bs-slide="next"
-        >
-          <span class="carousel-control-next-icon" aria-hidden="true"></span>
-          <span class="visually-hidden">Next</span>
-        </button>
-      </div>
-    </div>
+    <Slider :portada="resena.imagen" :video="resena.video" :carrete="carreteImages"/>
 
     <div class="card-body pt-0 px-0">
       <div
@@ -546,9 +539,11 @@ export default {
           <span class="material-symbols-outlined text-center"> star </span>
           <p class="fw-bold">{{ calificaciones.total }}</p>
         </div>
-          <p class="fw-bold">{{ cantidadVotos }} Personas calificaron el vehiculo</p>
+        <p class="fw-bold">
+          {{ cantidadVotos }} Personas calificaron el vehiculo
+        </p>
 
-        <div class="d-flex gap-2 w-3/4 mx-auto items-center flex-row mb-5">
+        <div class="calificacionesBox">
           <div class="rate mb-4">
             <div
               class="d-flex justify-content-center gap-2 w-3/4 mx-auto items-center text-center"
@@ -557,46 +552,87 @@ export default {
               <p class="fw-bold">{{ calificaciones.gasolina }}</p>
             </div>
             <p>Gasolina</p>
-            <input
-              type="radio"
-              id="star5"
-              name="rate"
-              value="5"
-              v-on:click="calificarResena(5, 1)"
-            />
-            <label for="star5" title="text">5 stars</label>
-            <input
-              type="radio"
-              id="star4"
-              name="rate"
-              value="4"
-              v-on:click="calificarResena(4, 1)"
-            />
-            <label for="star4" title="text">4 stars</label>
-            <input
-              type="radio"
-              id="star3"
-              name="rate"
-              value="3"
-              v-on:click="calificarResena(3, 1)"
-            />
-            <label for="star3" title="text">3 stars</label>
-            <input
-              type="radio"
-              id="star2"
-              name="rate"
-              value="2"
-              v-on:click="calificarResena(2, 1)"
-            />
-            <label for="star2" title="text">2 stars</label>
-            <input
-              type="radio"
-              id="star1"
-              name="rate"
-              value="1"
-              v-on:click="calificarResena(1, 1)"
-            />
-            <label for="star1" title="text">1 star</label>
+            <div class="star-source">
+              <svg>
+                <linearGradient
+                  x1="50%"
+                  y1="5.41294643%"
+                  x2="87.5527344%"
+                  y2="65.4921875%"
+                  id="grad"
+                >
+                  <stop stop-color="#FFDE10" offset="0%"></stop>
+                  <stop stop-color="#E1A105" offset="60%"></stop>
+                  <stop stop-color="#F6790B" offset="100%"></stop>
+                </linearGradient>
+                <symbol id="star" viewBox="153 89 106 108">
+                  <polygon
+                    id="star-shape"
+                    stroke="url(#grad)"
+                    stroke-width="5"
+                    fill="currentColor"
+                    points="206 162.5 176.610737 185.45085 189.356511 150.407797 158.447174 129.54915 195.713758 130.842203 206 95 216.286242 130.842203 253.552826 129.54915 222.643489 150.407797 235.389263 185.45085"
+                  ></polygon>
+                </symbol>
+              </svg>
+            </div>
+            <div class="star-container">
+              <input
+                type="radio"
+                name="star"
+                id="five"
+                v-on:click="calificarResena(5, 1)"
+              />
+              <label for="five">
+                <svg class="star">
+                  <use xlink:href="#star" />
+                </svg>
+              </label>
+              <input
+                type="radio"
+                name="star"
+                id="four"
+                v-on:click="calificarResena(4, 1)"
+              />
+              <label for="four">
+                <svg class="star">
+                  <use xlink:href="#star" />
+                </svg>
+              </label>
+              <input
+                type="radio"
+                name="star"
+                id="three"
+                v-on:click="calificarResena(3, 1)"
+              />
+              <label for="three">
+                <svg class="star">
+                  <use xlink:href="#star" />
+                </svg>
+              </label>
+              <input
+                type="radio"
+                name="star"
+                id="two"
+                v-on:click="calificarResena(2, 1)"
+              />
+              <label for="two">
+                <svg class="star">
+                  <use xlink:href="#star" />
+                </svg>
+              </label>
+              <input
+                type="radio"
+                name="star"
+                id="one"
+                v-on:click="calificarResena(1, 1)"
+              />
+              <label for="one">
+                <svg class="star">
+                  <use xlink:href="#star" />
+                </svg>
+              </label>
+            </div>
           </div>
           <div class="rate mb-4">
             <div
@@ -606,46 +642,87 @@ export default {
               <p class="fw-bold">{{ calificaciones.confiabilidad }}</p>
             </div>
             <p>Confiabilidad</p>
-            <input
-              type="radio"
-              id="starConfibialidad5"
-              name="rate"
-              value="5"
-              v-on:click="calificarResena(5, 2)"
-            />
-            <label for="starConfibialidad5" title="text">5 stars</label>
-            <input
-              type="radio"
-              id="starConfibialidad4"
-              name="rate"
-              value="4"
-              v-on:click="calificarResena(4, 2)"
-            />
-            <label for="starConfibialidad4" title="text">4 stars</label>
-            <input
-              type="radio"
-              id="starConfibialidad3"
-              name="rate"
-              value="3"
-              v-on:click="calificarResena(3, 2)"
-            />
-            <label for="starConfibialidad3" title="text">3 stars</label>
-            <input
-              type="radio"
-              id="starConfibialidad2"
-              name="rate"
-              value="2"
-              v-on:click="calificarResena(2, 2)"
-            />
-            <label for="starConfibialidad2" title="text">2 stars</label>
-            <input
-              type="radio"
-              id="starConfibialidad1"
-              name="rate"
-              value="1"
-              v-on:click="calificarResena(1, 2)"
-            />
-            <label for="starConfibialidad1" title="text">1 star</label>
+            <div class="star-source">
+              <svg>
+                <linearGradient
+                  x1="50%"
+                  y1="5.41294643%"
+                  x2="87.5527344%"
+                  y2="65.4921875%"
+                  id="grad"
+                >
+                  <stop stop-color="#FFDE10" offset="0%"></stop>
+                  <stop stop-color="#E1A105" offset="60%"></stop>
+                  <stop stop-color="#F6790B" offset="100%"></stop>
+                </linearGradient>
+                <symbol id="star" viewBox="153 89 106 108">
+                  <polygon
+                    id="star-shape"
+                    stroke="url(#grad)"
+                    stroke-width="5"
+                    fill="currentColor"
+                    points="206 162.5 176.610737 185.45085 189.356511 150.407797 158.447174 129.54915 195.713758 130.842203 206 95 216.286242 130.842203 253.552826 129.54915 222.643489 150.407797 235.389263 185.45085"
+                  ></polygon>
+                </symbol>
+              </svg>
+            </div>
+            <div class="star-container">
+              <input
+                type="radio"
+                name="star"
+                id="starConfiabilidad5"
+                v-on:click="calificarResena(5, 2)"
+              />
+              <label for="starConfiabilidad5">
+                <svg class="star">
+                  <use xlink:href="#star" />
+                </svg>
+              </label>
+              <input
+                type="radio"
+                name="star"
+                id="starConfiabilidad4"
+                v-on:click="calificarResena(4, 2)"
+              />
+              <label for="starConfiabilidad4">
+                <svg class="star">
+                  <use xlink:href="#star" />
+                </svg>
+              </label>
+              <input
+                type="radio"
+                name="star"
+                id="starConfiabilidad3"
+                v-on:click="calificarResena(3, 2)"
+              />
+              <label for="starConfiabilidad3">
+                <svg class="star">
+                  <use xlink:href="#star" />
+                </svg>
+              </label>
+              <input
+                type="radio"
+                name="star"
+                id="starConfiabilidad2"
+                v-on:click="calificarResena(2, 2)"
+              />
+              <label for="starConfiabilidad2">
+                <svg class="star">
+                  <use xlink:href="#star" />
+                </svg>
+              </label>
+              <input
+                type="radio"
+                name="star"
+                id="starConfiabilidad1"
+                v-on:click="calificarResena(1, 2)"
+              />
+              <label for="starConfiabilidad1">
+                <svg class="star">
+                  <use xlink:href="#star" />
+                </svg>
+              </label>
+            </div>
           </div>
           <div class="rate mb-4">
             <div
@@ -655,46 +732,87 @@ export default {
               <p class="fw-bold">{{ calificaciones.confort }}</p>
             </div>
             <p>Confort</p>
-            <input
-              type="radio"
-              id="starConfort5"
-              name="rate"
-              value="5"
-              v-on:click="calificarResena(5, 3)"
-            />
-            <label for="starConfort5" title="text">5 stars</label>
-            <input
-              type="radio"
-              id="starConfort4"
-              name="rate"
-              value="4"
-              v-on:click="calificarResena(4, 3)"
-            />
-            <label for="starConfort4" title="text">4 stars</label>
-            <input
-              type="radio"
-              id="starConfort3"
-              name="rate"
-              value="3"
-              v-on:click="calificarResena(3, 3)"
-            />
-            <label for="starConfort3" title="text">3 stars</label>
-            <input
-              type="radio"
-              id="starConfort2"
-              name="rate"
-              value="2"
-              v-on:click="calificarResena(2, 3)"
-            />
-            <label for="starConfort2" title="text">2 stars</label>
-            <input
-              type="radio"
-              id="starConfort1"
-              name="rate"
-              value="1"
-              v-on:click="calificarResena(1, 3)"
-            />
-            <label for="starConfort1" title="text">1 star</label>
+            <div class="star-source">
+              <svg>
+                <linearGradient
+                  x1="50%"
+                  y1="5.41294643%"
+                  x2="87.5527344%"
+                  y2="65.4921875%"
+                  id="grad"
+                >
+                  <stop stop-color="#FFDE10" offset="0%"></stop>
+                  <stop stop-color="#E1A105" offset="60%"></stop>
+                  <stop stop-color="#F6790B" offset="100%"></stop>
+                </linearGradient>
+                <symbol id="star" viewBox="153 89 106 108">
+                  <polygon
+                    id="star-shape"
+                    stroke="url(#grad)"
+                    stroke-width="5"
+                    fill="currentColor"
+                    points="206 162.5 176.610737 185.45085 189.356511 150.407797 158.447174 129.54915 195.713758 130.842203 206 95 216.286242 130.842203 253.552826 129.54915 222.643489 150.407797 235.389263 185.45085"
+                  ></polygon>
+                </symbol>
+              </svg>
+            </div>
+            <div class="star-container">
+              <input
+                type="radio"
+                name="star"
+                id="starConfort5"
+                v-on:click="calificarResena(5, 3)"
+              />
+              <label for="starConfort5">
+                <svg class="star">
+                  <use xlink:href="#star" />
+                </svg>
+              </label>
+              <input
+                type="radio"
+                name="star"
+                id="starConfort4"
+                v-on:click="calificarResena(4, 3)"
+              />
+              <label for="starConfort4">
+                <svg class="star">
+                  <use xlink:href="#star" />
+                </svg>
+              </label>
+              <input
+                type="radio"
+                name="star"
+                id="starConfort3"
+                v-on:click="calificarResena(3, 3)"
+              />
+              <label for="starConfort3">
+                <svg class="star">
+                  <use xlink:href="#star" />
+                </svg>
+              </label>
+              <input
+                type="radio"
+                name="star"
+                id="starConfort2"
+                v-on:click="calificarResena(2, 3)"
+              />
+              <label for="starConfort2">
+                <svg class="star">
+                  <use xlink:href="#star" />
+                </svg>
+              </label>
+              <input
+                type="radio"
+                name="star"
+                id="starConfort"
+                v-on:click="calificarResena(1, 3)"
+              />
+              <label for="starConfort">
+                <svg class="star">
+                  <use xlink:href="#star" />
+                </svg>
+              </label>
+            </div>
           </div>
           <div class="rate mb-4">
             <div
@@ -704,46 +822,88 @@ export default {
               <p class="fw-bold">{{ calificaciones.diseno }}</p>
             </div>
             <p>Diseño</p>
-            <input
-              type="radio"
-              id="starDiseno5"
-              name="rate"
-              value="5"
-              v-on:click="calificarResena(5, 4)"
-            />
-            <label for="starDiseno5" title="text">5 stars</label>
-            <input
-              type="radio"
-              id="starDiseno4"
-              name="rate"
-              value="4"
-              v-on:click="calificarResena(4, 4)"
-            />
-            <label for="starDiseno4" title="text">4 stars</label>
-            <input
-              type="radio"
-              id="starDiseno3"
-              name="rate"
-              value="3"
-              v-on:click="calificarResena(3, 4)"
-            />
-            <label for="starDiseno3" title="text">3 stars</label>
-            <input
-              type="radio"
-              id="starDiseno2"
-              name="rate"
-              value="2"
-              v-on:click="calificarResena(2, 4)"
-            />
-            <label for="starDiseno2" title="text">2 stars</label>
-            <input
-              type="radio"
-              id="starDiseno1"
-              name="rate"
-              value="1"
-              v-on:click="calificarResena(1, 4)"
-            />
-            <label for="starDiseno1" title="text">1 star</label>
+
+            <div class="star-source">
+              <svg>
+                <linearGradient
+                  x1="50%"
+                  y1="5.41294643%"
+                  x2="87.5527344%"
+                  y2="65.4921875%"
+                  id="grad"
+                >
+                  <stop stop-color="#FFDE10" offset="0%"></stop>
+                  <stop stop-color="#E1A105" offset="60%"></stop>
+                  <stop stop-color="#F6790B" offset="100%"></stop>
+                </linearGradient>
+                <symbol id="star" viewBox="153 89 106 108">
+                  <polygon
+                    id="star-shape"
+                    stroke="url(#grad)"
+                    stroke-width="5"
+                    fill="currentColor"
+                    points="206 162.5 176.610737 185.45085 189.356511 150.407797 158.447174 129.54915 195.713758 130.842203 206 95 216.286242 130.842203 253.552826 129.54915 222.643489 150.407797 235.389263 185.45085"
+                  ></polygon>
+                </symbol>
+              </svg>
+            </div>
+            <div class="star-container">
+              <input
+                type="radio"
+                name="star"
+                id="starDiseno5"
+                v-on:click="calificarResena(5, 4)"
+              />
+              <label for="starDiseno5">
+                <svg class="star">
+                  <use xlink:href="#star" />
+                </svg>
+              </label>
+              <input
+                type="radio"
+                name="star"
+                id="starDiseno4"
+                v-on:click="calificarResena(4, 4)"
+              />
+              <label for="starDiseno4">
+                <svg class="star">
+                  <use xlink:href="#star" />
+                </svg>
+              </label>
+              <input
+                type="radio"
+                name="star"
+                id="starDiseno3"
+                v-on:click="calificarResena(3, 4)"
+              />
+              <label for="starDiseno3">
+                <svg class="star">
+                  <use xlink:href="#star" />
+                </svg>
+              </label>
+              <input
+                type="radio"
+                name="star"
+                id="starDiseno2"
+                v-on:click="calificarResena(2, 4)"
+              />
+              <label for="starDiseno2">
+                <svg class="star">
+                  <use xlink:href="#star" />
+                </svg>
+              </label>
+              <input
+                type="radio"
+                name="star"
+                id="starDiseno"
+                v-on:click="calificarResena(1, 4)"
+              />
+              <label for="starDiseno">
+                <svg class="star">
+                  <use xlink:href="#star" />
+                </svg>
+              </label>
+            </div>
           </div>
           <div class="rate mb-4">
             <div
@@ -753,104 +913,159 @@ export default {
               <p class="fw-bold">{{ calificaciones.manejo }}</p>
             </div>
             <p>Manejo</p>
-            <input
-              type="radio"
-              id="starManejo5"
-              name="rate"
-              value="5"
-              v-on:click="calificarResena(5, 5)"
-            />
-            <label for="starManejo5" title="text">5 stars</label>
-            <input
-              type="radio"
-              id="starManejo4"
-              name="rate"
-              value="4"
-              v-on:click="calificarResena(4, 5)"
-            />
-            <label for="starManejo4" title="text">4 stars</label>
-            <input
-              type="radio"
-              id="starManejo3"
-              name="rate"
-              value="3"
-              v-on:click="calificarResena(3, 5)"
-            />
-            <label for="starManejo3" title="text">3 stars</label>
-            <input
-              type="radio"
-              id="starManejo2"
-              name="rate"
-              value="2"
-              v-on:click="calificarResena(2, 5)"
-            />
-            <label for="starManejo2" title="text">2 stars</label>
-            <input
-              type="radio"
-              id="starManejo1"
-              name="rate"
-              value="1"
-              v-on:click="calificarResena(1, 5)"
-            />
-            <label for="starManejo1" title="text">1 star</label>
+            <div class="star-source">
+              <svg>
+                <linearGradient
+                  x1="50%"
+                  y1="5.41294643%"
+                  x2="87.5527344%"
+                  y2="65.4921875%"
+                  id="grad"
+                >
+                  <stop stop-color="#FFDE10" offset="0%"></stop>
+                  <stop stop-color="#E1A105" offset="60%"></stop>
+                  <stop stop-color="#F6790B" offset="100%"></stop>
+                </linearGradient>
+                <symbol id="star" viewBox="153 89 106 108">
+                  <polygon
+                    id="star-shape"
+                    stroke="url(#grad)"
+                    stroke-width="5"
+                    fill="currentColor"
+                    points="206 162.5 176.610737 185.45085 189.356511 150.407797 158.447174 129.54915 195.713758 130.842203 206 95 216.286242 130.842203 253.552826 129.54915 222.643489 150.407797 235.389263 185.45085"
+                  ></polygon>
+                </symbol>
+              </svg>
+            </div>
+            <div class="star-container">
+              <input
+                type="radio"
+                name="star"
+                id="starManejo5"
+                v-on:click="calificarResena(5, 5)"
+              />
+              <label for="starManejo5">
+                <svg class="star">
+                  <use xlink:href="#star" />
+                </svg>
+              </label>
+              <input
+                type="radio"
+                name="star"
+                id="starManejo4"
+                v-on:click="calificarResena(4, 5)"
+              />
+              <label for="starManejo4">
+                <svg class="star">
+                  <use xlink:href="#star" />
+                </svg>
+              </label>
+              <input
+                type="radio"
+                name="star"
+                id="starManejo3"
+                v-on:click="calificarResena(3, 5)"
+              />
+              <label for="starManejo3">
+                <svg class="star">
+                  <use xlink:href="#star" />
+                </svg>
+              </label>
+              <input
+                type="radio"
+                name="star"
+                id="starManejo2"
+                v-on:click="calificarResena(2, 5)"
+              />
+              <label for="starManejo2">
+                <svg class="star">
+                  <use xlink:href="#star" />
+                </svg>
+              </label>
+              <input
+                type="radio"
+                name="star"
+                id="starManejo"
+                v-on:click="calificarResena(1, 5)"
+              />
+              <label for="starManejo">
+                <svg class="star">
+                  <use xlink:href="#star" />
+                </svg>
+              </label>
+            </div>
           </div>
         </div>
       </div>
+
       <hr class="mt-2 mx-3" />
 
       <div
-        class="caracteristicas"
+        class="detallesBox"
         v-for="detalle in detalles"
         :key="detalle.id"
       >
-        <div class="d-flex flex-row justify-content-between px-3 pb-4">
+
+      <div class="d-flex flex-column justify-content-between w-25 mb-3 mx-auto text-center">
+        <span class="text-muted">Rango de Precio</span> 
+        <span class="text-muted fs-6">${{ detalle.precio_inicial }} - ${{ detalle.precio_final }}</span>
+      </div>
+
+      <div class="d-flex flex-column justify-content-between w-25 mb-3 mx-auto text-center">
+        <span class="text-muted">Clasificación</span> 
+        <span class="text-muted fs-6">{{ detalle.etiquetas }}</span>
+      </div>
+
+      <div class="caracteristicas"> 
+        <div class="d-flex flex-row justify-content-between px-3 pb-4 mx-auto">
           <div class="d-flex flex-column">
             <span class="text-muted">Marca</span
             ><small class="text-muted fs-6">{{ detalle.marca }}</small>
           </div>
         </div>
-        <div class="d-flex flex-row justify-content-between px-3 pb-4">
+        <div class="d-flex flex-row justify-content-between px-3 pb-4 mx-auto">
           <div class="d-flex flex-column">
             <span class="text-muted">Modelo</span
             ><small class="text-muted fs-6">{{ detalle.modelo }}</small>
           </div>
         </div>
-        <div class="d-flex flex-row justify-content-between px-3 pb-4">
+        <div class="d-flex flex-row justify-content-between px-3 pb-4 mx-auto">
           <div class="d-flex flex-column">
             <span class="text-muted">Año</span
             ><small class="text-muted fs-6">{{ detalle.ano }}</small>
           </div>
         </div>
-        <div class="d-flex flex-row justify-content-between px-3 pb-4">
+        <div class="d-flex flex-row justify-content-between px-3 pb-4 mx-auto">
           <div class="d-flex flex-column">
             <span class="text-muted">HP</span
             ><small class="text-muted fs-6">{{ detalle.hp }}</small>
           </div>
         </div>
-        <div class="d-flex flex-row justify-content-between px-3 pb-4">
+        <div class="d-flex flex-row justify-content-between px-3 pb-4 mx-auto">
           <div class="d-flex flex-column">
             <span class="text-muted">Combustible</span
             ><small class="text-muted fs-6">{{ motor[0].combustible }}</small>
           </div>
         </div>
-        <div class="d-flex flex-row justify-content-between px-3 pb-4">
+        <div class="d-flex flex-row justify-content-between px-3 pb-4 mx-auto">
           <div class="d-flex flex-column">
             <span class="text-muted">Puertas</span
             ><small class="text-muted fs-6">{{ detalle.puertas }}</small>
           </div>
         </div>
-        <div class="d-flex flex-row justify-content-between px-3 pb-4">
+        <div class="d-flex flex-row justify-content-between px-3 pb-4 mx-auto">
           <div class="d-flex flex-column">
             <span class="text-muted">Transmision</span
             ><small class="text-muted fs-6">{{ chasis[0].tranmision }}</small>
           </div>
         </div>
-        <div class="d-flex flex-row justify-content-between px-3 pb-4">
+        <div class="d-flex flex-row justify-content-between px-3 pb-4 mx-auto">
           <div class="d-flex flex-column">
             <span class="text-muted">Motor</span
             ><small class="text-muted fs-6">{{ motor[0].cilindros }}</small>
           </div>
         </div>
+      </div>
       </div>
 
       <div class="detalles">
@@ -859,7 +1074,7 @@ export default {
           id="accordionFlushExample"
         >
           <div class="accordion-item">
-            <h2 class="accordion-header" id="flush-headingOne">
+            <h3 class="accordion-header" id="flush-headingOne">
               <button
                 class="accordion-button collapsed"
                 type="button"
@@ -870,7 +1085,7 @@ export default {
               >
                 Motor
               </button>
-            </h2>
+            </h3>
             <div
               id="flush-collapseOne"
               class="accordion-collapse collapse"
@@ -882,13 +1097,25 @@ export default {
               <div class="accordion-body">
                 <!-- Some borders are removed -->
                 <ul class="list-group list-group-flush">
-                  <li class="list-group-item">Combustible: {{ motor.combustible }}</li>
-                  <li class="list-group-item">Potencia: {{ motor.potencia }}</li>
+                  <li class="list-group-item">
+                    Combustible: {{ motor.combustible }}
+                  </li>
+                  <li class="list-group-item">
+                    Potencia: {{ motor.potencia }}
+                  </li>
                   <li class="list-group-item">Torque: {{ motor.torque }}</li>
-                  <li class="list-group-item">Cilindros: {{ motor.cilindros }}</li>
-                  <li class="list-group-item">Valvulas: {{ motor.valvulas }}</li>
-                  <li class="list-group-item">Alimentacion: {{ motor.alimentacion }}</li>
-                  <li class="list-group-item">Sistema start/stop: {{ motor.sistema }}</li>
+                  <li class="list-group-item">
+                    Cilindros: {{ motor.cilindros }}
+                  </li>
+                  <li class="list-group-item">
+                    Valvulas: {{ motor.valvulas }}
+                  </li>
+                  <li class="list-group-item">
+                    Alimentacion: {{ motor.alimentacion }}
+                  </li>
+                  <li class="list-group-item">
+                    Sistema start/stop: {{ motor.sistema }}
+                  </li>
                 </ul>
               </div>
             </div>
@@ -900,7 +1127,7 @@ export default {
           id="accordionFlushExample"
         >
           <div class="accordion-item">
-            <h2 class="accordion-header" id="flush-headingTwo">
+            <h3 class="accordion-header" id="flush-headingTwo">
               <button
                 class="accordion-button collapsed"
                 type="button"
@@ -911,7 +1138,7 @@ export default {
               >
                 Performance
               </button>
-            </h2>
+            </h3>
             <div
               id="flush-collapseTwo"
               class="accordion-collapse collapse"
@@ -923,11 +1150,21 @@ export default {
               <div class="accordion-body">
                 <!-- Some borders are removed -->
                 <ul class="list-group list-group-flush">
-                  <li class="list-group-item">Aceleracion 0-100km: {{ perfomance.aceleracion }}</li>
-                  <li class="list-group-item">Velocidad Maxima: {{ perfomance.velocidad }}</li>
-                  <li class="list-group-item">Rendimiento en ciudad: {{ perfomance.rendimientociudad }}</li>
-                  <li class="list-group-item">Rendimiento en ruta: {{ perfomance.rendimientoruta }}</li>
-                  <li class="list-group-item">Rendimiento mixto: {{ perfomance.rendimientomixto }}</li>
+                  <li class="list-group-item">
+                    Aceleracion 0-100km: {{ perfomance.aceleracion }}
+                  </li>
+                  <li class="list-group-item">
+                    Velocidad Maxima: {{ perfomance.velocidad }}
+                  </li>
+                  <li class="list-group-item">
+                    Rendimiento en ciudad: {{ perfomance.rendimientociudad }}
+                  </li>
+                  <li class="list-group-item">
+                    Rendimiento en ruta: {{ perfomance.rendimientoruta }}
+                  </li>
+                  <li class="list-group-item">
+                    Rendimiento mixto: {{ perfomance.rendimientomixto }}
+                  </li>
                 </ul>
               </div>
             </div>
@@ -939,7 +1176,7 @@ export default {
           id="accordionFlushExample"
         >
           <div class="accordion-item">
-            <h2 class="accordion-header" id="flush-headingThree">
+            <h3 class="accordion-header" id="flush-headingThree">
               <button
                 class="accordion-button collapsed"
                 type="button"
@@ -950,7 +1187,7 @@ export default {
               >
                 Transmision y Chasis
               </button>
-            </h2>
+            </h3>
             <div
               id="flush-collapseThree"
               class="accordion-collapse collapse"
@@ -962,29 +1199,42 @@ export default {
               <div class="accordion-body">
                 <!-- Some borders are removed -->
                 <ul class="list-group list-group-flush">
-                  <li class="list-group-item">Motor (posición): {{ chasis.motor }}</li>
-                  <li class="list-group-item">Traccion: {{ chasis.traccion }}</li>
-                  <li class="list-group-item">Transmisión: {{ chasis.tranmision }}</li>
                   <li class="list-group-item">
-                    Frenos (Delanteros y traseros):  {{ chasis.frenos }}
+                    Motor (posición): {{ chasis.motor }}
                   </li>
-                  <li class="list-group-item">Neumáticos:  {{ chasis.neumaticos }}</li>
-                  <li class="list-group-item">Suspensión delantera:  {{ chasis.suspdelantero }}</li>
-                  <li class="list-group-item">Suspensión trasera:  {{ chasis.susptrasera }}</li>
-                  <li class="list-group-item">Dirección asistida:  {{ chasis.direccion }}</li>
+                  <li class="list-group-item">
+                    Traccion: {{ chasis.traccion }}
+                  </li>
+                  <li class="list-group-item">
+                    Transmisión: {{ chasis.tranmision }}
+                  </li>
+                  <li class="list-group-item">
+                    Frenos (Delanteros y traseros): {{ chasis.frenos }}
+                  </li>
+                  <li class="list-group-item">
+                    Neumáticos: {{ chasis.neumaticos }}
+                  </li>
+                  <li class="list-group-item">
+                    Suspensión delantera: {{ chasis.suspdelantero }}
+                  </li>
+                  <li class="list-group-item">
+                    Suspensión trasera: {{ chasis.susptrasera }}
+                  </li>
+                  <li class="list-group-item">
+                    Dirección asistida: {{ chasis.direccion }}
+                  </li>
                 </ul>
               </div>
             </div>
           </div>
         </div>
 
-        
         <div
           class="accordion accordion-flush w-75 mx-auto"
           id="accordionFlushExample"
         >
           <div class="accordion-item">
-            <h2 class="accordion-header" id="flush-headingFour">
+            <h3 class="accordion-header" id="flush-headingFour">
               <button
                 class="accordion-button collapsed"
                 type="button"
@@ -995,7 +1245,7 @@ export default {
               >
                 Medidas y capacidades
               </button>
-            </h2>
+            </h3>
             <div
               id="flush-collapseFour"
               class="accordion-collapse collapse"
@@ -1013,31 +1263,52 @@ export default {
                   <li class="list-group-item">
                     Distancia entre ejes: {{ medidas.distanciaejes }}
                   </li>
-                  <li class="list-group-item">Cajuela: {{ medidas.cajuela }}</li>
-                  <li class="list-group-item">Tanque de combustible: {{ medidas.tanque }}</li>
+                  <li class="list-group-item">
+                    Cajuela: {{ medidas.cajuela }}
+                  </li>
+                  <li class="list-group-item">
+                    Tanque de combustible: {{ medidas.tanque }}
+                  </li>
                   <li class="list-group-item">Peso: {{ medidas.peso }}</li>
-                  <li class="list-group-item">Capacidad de carga: {{ medidas.capacidadcarga }}</li>
-                  <li class="list-group-item">Altura de piso: {{ medidas.alturapiso }}</li>
-                  <li class="list-group-item">Capacidad de vadeo: {{ medidas.capacidadvadeo }}</li>
-                  <li class="list-group-item">Ángulo de ataque: {{ medidas.anguloataque }}</li>
-                  <li class="list-group-item">Ángulo de partida: {{ medidas.angulopartida }}</li>
-                  <li class="list-group-item">Ángulo ventral: {{ medidas.anguloventral }}</li>
-                  <li class="list-group-item">Remolque con frenos: {{ medidas.remolque }}</li>
-                  <li class="list-group-item">Escalonamiento vertical: {{ medidas.escalonamiento }}</li>
-                  <li class="list-group-item">Inclinacion lateral: {{ medidas.inclinacion }}</li>
+                  <li class="list-group-item">
+                    Capacidad de carga: {{ medidas.capacidadcarga }}
+                  </li>
+                  <li class="list-group-item">
+                    Altura de piso: {{ medidas.alturapiso }}
+                  </li>
+                  <li class="list-group-item">
+                    Capacidad de vadeo: {{ medidas.capacidadvadeo }}
+                  </li>
+                  <li class="list-group-item">
+                    Ángulo de ataque: {{ medidas.anguloataque }}
+                  </li>
+                  <li class="list-group-item">
+                    Ángulo de partida: {{ medidas.angulopartida }}
+                  </li>
+                  <li class="list-group-item">
+                    Ángulo ventral: {{ medidas.anguloventral }}
+                  </li>
+                  <li class="list-group-item">
+                    Remolque con frenos: {{ medidas.remolque }}
+                  </li>
+                  <li class="list-group-item">
+                    Escalonamiento vertical: {{ medidas.escalonamiento }}
+                  </li>
+                  <li class="list-group-item">
+                    Inclinacion lateral: {{ medidas.inclinacion }}
+                  </li>
                 </ul>
               </div>
             </div>
           </div>
         </div>
 
-        
         <div
           class="accordion accordion-flush w-75 mx-auto"
           id="accordionFlushExample"
         >
           <div class="accordion-item">
-            <h2 class="accordion-header" id="flush-headingFour">
+            <h3 class="accordion-header" id="flush-headingFour">
               <button
                 class="accordion-button collapsed"
                 type="button"
@@ -1048,7 +1319,7 @@ export default {
               >
                 Seguridad
               </button>
-            </h2>
+            </h3>
             <div
               id="flush-collapseFive"
               class="accordion-collapse collapse"
@@ -1060,34 +1331,58 @@ export default {
               <div class="accordion-body">
                 <!-- Some borders are removed -->
                 <ul class="list-group list-group-flush">
-                  <li class="list-group-item">Airbag: {{ seguridad.airbag }}</li>
-                  <li class="list-group-item">ABS: {{ seguridad.abs }}</li>
-                  <li class="list-group-item">Distribucion Electronica de Frenado: {{ seguridad.distfrenado }}</li>
                   <li class="list-group-item">
-                    Asistencia en frenada de emergencia: {{ seguridad.asistfrenado }}
+                    Airbag: {{ seguridad.airbag }}
                   </li>
-                  <li class="list-group-item">Alarma e inmovilizador de motor: {{ seguridad.alarma }}</li>
-                  <li class="list-group-item">Anclaje para asientos infantiles: {{ seguridad.anclaje }}</li>
-                  <li class="list-group-item">Cinturones de seguridad: {{ seguridad.cinturones }}</li>
-                  <li class="list-group-item">Otros (especificar): {{ seguridad.otros }}</li>
-                  <li class="list-group-item">Sensor de lluvia: {{ seguridad.sensor }}</li>
-                  <li class="list-group-item">Tercera luz de stop: {{ seguridad.terceraluz }}</li>
-                  <li class="list-group-item">Autobloqueo de puertas con velocidad: {{ seguridad.autobloqueo }}</li>
-                  <li class="list-group-item">Control de estabilidad: {{ seguridad.controlestabilidad }}</li>
-                  <li class="list-group-item">Control de tracción:  {{ seguridad.controltraccion }}</li>
+                  <li class="list-group-item">ABS: {{ seguridad.abs }}</li>
+                  <li class="list-group-item">
+                    Distribucion Electronica de Frenado:
+                    {{ seguridad.distfrenado }}
+                  </li>
+                  <li class="list-group-item">
+                    Asistencia en frenada de emergencia:
+                    {{ seguridad.asistfrenado }}
+                  </li>
+                  <li class="list-group-item">
+                    Alarma e inmovilizador de motor: {{ seguridad.alarma }}
+                  </li>
+                  <li class="list-group-item">
+                    Anclaje para asientos infantiles: {{ seguridad.anclaje }}
+                  </li>
+                  <li class="list-group-item">
+                    Cinturones de seguridad: {{ seguridad.cinturones }}
+                  </li>
+                  <li class="list-group-item">
+                    Otros (especificar): {{ seguridad.otros }}
+                  </li>
+                  <li class="list-group-item">
+                    Sensor de lluvia: {{ seguridad.sensor }}
+                  </li>
+                  <li class="list-group-item">
+                    Tercera luz de stop: {{ seguridad.terceraluz }}
+                  </li>
+                  <li class="list-group-item">
+                    Autobloqueo de puertas con velocidad:
+                    {{ seguridad.autobloqueo }}
+                  </li>
+                  <li class="list-group-item">
+                    Control de estabilidad: {{ seguridad.controlestabilidad }}
+                  </li>
+                  <li class="list-group-item">
+                    Control de tracción: {{ seguridad.controltraccion }}
+                  </li>
                 </ul>
               </div>
             </div>
           </div>
         </div>
 
-        
         <div
           class="accordion accordion-flush w-75 mx-auto"
           id="accordionFlushExample"
         >
           <div class="accordion-item">
-            <h2 class="accordion-header" id="flush-headingFour">
+            <h3 class="accordion-header" id="flush-headingFour">
               <button
                 class="accordion-button collapsed"
                 type="button"
@@ -1098,7 +1393,7 @@ export default {
               >
                 Comunicacion y entretenimiento
               </button>
-            </h2>
+            </h3>
             <div
               id="flush-collapseSix"
               class="accordion-collapse collapse"
@@ -1110,27 +1405,33 @@ export default {
               <div class="accordion-body">
                 <!-- Some borders are removed -->
                 <ul class="list-group list-group-flush">
-                  <li class="list-group-item">Equipo de música: {{ entretenimiento.musica }}</li>
-                  <li class="list-group-item">Bocinas: {{ entretenimiento.bocinas }}</li>
-                  <li class="list-group-item">Conexión auxiliar: {{ entretenimiento.conex }}</li>
+                  <li class="list-group-item">
+                    Equipo de música: {{ entretenimiento.musica }}
+                  </li>
+                  <li class="list-group-item">
+                    Bocinas: {{ entretenimiento.bocinas }}
+                  </li>
+                  <li class="list-group-item">
+                    Conexión auxiliar: {{ entretenimiento.conex }}
+                  </li>
                   <li class="list-group-item">
                     Interfaz bluetooth: {{ entretenimiento.bluetooth }}
                   </li>
-                  <li class="list-group-item">Pantalla en tablero: {{ entretenimiento.tablero }}</li>
+                  <li class="list-group-item">
+                    Pantalla en tablero: {{ entretenimiento.tablero }}
+                  </li>
                 </ul>
               </div>
             </div>
           </div>
         </div>
 
-        
-        
         <div
           class="accordion accordion-flush w-75 mx-auto"
           id="accordionFlushExample"
         >
           <div class="accordion-item">
-            <h2 class="accordion-header" id="flush-headingFour">
+            <h3 class="accordion-header" id="flush-headingFour">
               <button
                 class="accordion-button collapsed"
                 type="button"
@@ -1141,7 +1442,7 @@ export default {
               >
                 Confort
               </button>
-            </h2>
+            </h3>
             <div
               id="flush-collapseSeven"
               class="accordion-collapse collapse"
@@ -1153,27 +1454,61 @@ export default {
               <div class="accordion-body">
                 <!-- Some borders are removed -->
                 <ul class="list-group list-group-flush">
-                  <li class="list-group-item">Aire acondicionado: {{ confort.aire }}</li>
-                  <li class="list-group-item">Asientos delanteros: {{ confort.asientosd }}</li>
-                  <li class="list-group-item">Asientos traseros: {{ confort.asientost }}</li>
+                  <li class="list-group-item">
+                    Aire acondicionado: {{ confort.aire }}
+                  </li>
+                  <li class="list-group-item">
+                    Asientos delanteros: {{ confort.asientosd }}
+                  </li>
+                  <li class="list-group-item">
+                    Asientos traseros: {{ confort.asientost }}
+                  </li>
                   <li class="list-group-item">
                     Cierre de puertas: {{ confort.cierre }}
                   </li>
-                  <li class="list-group-item">Computadora de a bordo: {{ confort.computadora }}</li>
-                  <li class="list-group-item">Espejo interior: {{ confort.espejoi }}</li>
-                  <li class="list-group-item">Espejos exteriores: {{ confort.espejoe }}</li>
-                  <li class="list-group-item">Faros antiniebla: {{ confort.farosniebla }}</li>
-                  <li class="list-group-item">Faros delanteros: {{ confort.farosdelanteros }}</li>
-                  <li class="list-group-item">Palanca de cambios: {{ confort.palanca }}</li>
-                  <li class="list-group-item">Quemacocos: {{ confort.quemacocos }}</li>
+                  <li class="list-group-item">
+                    Computadora de a bordo: {{ confort.computadora }}
+                  </li>
+                  <li class="list-group-item">
+                    Espejo interior: {{ confort.espejoi }}
+                  </li>
+                  <li class="list-group-item">
+                    Espejos exteriores: {{ confort.espejoe }}
+                  </li>
+                  <li class="list-group-item">
+                    Faros antiniebla: {{ confort.farosniebla }}
+                  </li>
+                  <li class="list-group-item">
+                    Faros delanteros: {{ confort.farosdelanteros }}
+                  </li>
+                  <li class="list-group-item">
+                    Palanca de cambios: {{ confort.palanca }}
+                  </li>
+                  <li class="list-group-item">
+                    Quemacocos: {{ confort.quemacocos }}
+                  </li>
                   <li class="list-group-item">Rines: {{ confort.rines }}</li>
-                  <li class="list-group-item">Vestiduras: {{ confort.vestiduras }}</li>
-                  <li class="list-group-item">Control de velocidad crucero: {{ confort.crucero }}</li>
-                  <li class="list-group-item">Vidrios (delanteros y traseros): {{ confort.vidrios }}</li>
-                  <li class="list-group-item">Volante: {{ confort.volante }}</li>
-                  <li class="list-group-item">Apertura cajuela y tapa combustible: {{ confort.cajuela }}</li>
-                  <li class="list-group-item">Sensor de estacionamiento: {{ confort.sensor }}</li>
-                  <li class="list-group-item">Cámara de visión trasera: {{ confort.camara }}</li>
+                  <li class="list-group-item">
+                    Vestiduras: {{ confort.vestiduras }}
+                  </li>
+                  <li class="list-group-item">
+                    Control de velocidad crucero: {{ confort.crucero }}
+                  </li>
+                  <li class="list-group-item">
+                    Vidrios (delanteros y traseros): {{ confort.vidrios }}
+                  </li>
+                  <li class="list-group-item">
+                    Volante: {{ confort.volante }}
+                  </li>
+                  <li class="list-group-item">
+                    Apertura cajuela y tapa combustible: {{ confort.cajuela }}
+                  </li>
+                  <li class="list-group-item">
+                    Sensor de estacionamiento: {{ confort.sensor }}
+                  </li>
+                  <li class="list-group-item">
+                    Cámara de visión trasera: {{ confort.camara }}
+                  </li>
                 </ul>
               </div>
             </div>
@@ -1349,7 +1684,7 @@ export default {
               </button>
             </div>
             <div v-if="comentario.imagen != ''">
-              <img :src="comentario.imagen" alt="Chat Message Image" />
+              <img :src="comentario.imagen" class="comentarioImagen" alt="Chat Message Image" />
             </div>
 
             <div class="" v-if="comentario.replicas.length > 0">
@@ -1514,41 +1849,6 @@ export default {
   height: 48px;
 }
 
-.rate {
-  float: left;
-  height: 46px;
-  padding: 0 10px;
-}
-.rate:not(:checked) > input {
-  position: absolute;
-  top: -9999px;
-}
-.rate:not(:checked) > label {
-  width: 1em;
-  overflow: hidden;
-  white-space: nowrap;
-  cursor: pointer;
-  font-size: 30px;
-  color: #ccc;
-}
-.rate:not(:checked) > label:before {
-  content: "★ ";
-}
-.rate > input:checked ~ label {
-  color: #ffc700;
-}
-.rate:not(:checked) > label:hover,
-.rate:not(:checked) > label:hover ~ label {
-  color: #deb217;
-}
-.rate > input:checked + label:hover,
-.rate > input:checked + label:hover ~ label,
-.rate > input:checked ~ label:hover,
-.rate > input:checked ~ label:hover ~ label,
-.rate > label:hover ~ input:checked ~ label {
-  color: #c59b08;
-}
-
 iframe {
   border-top-left-radius: 5px;
   border-top-right-radius: 5px;
@@ -1607,12 +1907,36 @@ iframe {
   text-align: center;
 }
 
-@media only screen and (min-width: 800px) {
-  .caracteristicas {
+
+.calificacionesBox {
+    display: flex;
     flex-direction: row;
+    gap: 25px;
+    justify-content: center;
+}
+
+.detallesBox {
+  width: 100%;
+  display: grid;
+}
+
+.caracteristicas {
+  display: flex;
+  flex-direction: row;
+}
+
+@media only screen and (max-width: 1200px){
+  .calificacionesBox {
+    display: grid;
   }
+.caracteristicas {
+  flex-direction: column;
+}
+}
+
+@media only screen and (max-width: 800px) {
   .card {
-    width: 90%;
+    width: 98%;
   }
 }
 
@@ -1676,10 +2000,118 @@ small.justify-content-center {
 
 .reply-image {
   height: 200px;
+  max-width: 600px;
+  overflow-x: scroll;
 }
 
+
+.comentarioImagen {
+  max-width: 600px;
+  overflow-x: scroll;
+}
+
+@media only screen and (max-width: 600px) {
+  
+.reply-image {
+  height: 200px;
+  max-width: 300px;
+  overflow-x: scroll;
+}
+.comentarioImagen {
+  max-width: 300px;
+  overflow-x: scroll;
+}
+
+}
 .car-image {
   height: 100%;
   width: 100%;
+}
+
+h1 {
+  font-family: "Fjalla One", sans-serif;
+  margin-bottom: 0.15rem;
+}
+
+h2 {
+  font-family: "Cutive Mono", "Courier New";
+  font-size: 1rem;
+  letter-spacing: 1px;
+  margin-bottom: 4rem;
+}
+
+label {
+  cursor: pointer;
+}
+
+svg {
+  width: 2rem;
+  height: 2rem;
+  padding: 0.15rem;
+}
+
+/* hide radio buttons */
+
+input[name="star"] {
+  display: inline-block;
+  width: 0;
+  opacity: 0;
+  margin-left: -2px;
+}
+
+/* hide source svg */
+
+.star-source {
+  width: 0;
+  height: 0;
+  visibility: hidden;
+}
+
+/* set initial color to transparent so fill is empty*/
+
+.star {
+  color: transparent;
+  transition: color 0.2s ease-in-out;
+}
+
+/* set direction to row-reverse so 5th star is at the end and ~ can be used to fill all sibling stars that precede last starred element*/
+
+.star-container {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: center;
+}
+
+label:hover ~ label .star,
+svg.star:hover,
+input[name="star"]:focus ~ label .star,
+input[name="star"]:checked ~ label .star {
+  color: #ebd61b;
+}
+
+input[name="star"]:checked + label .star {
+  animation: starred 0.5s;
+}
+
+input[name="star"]:checked + label {
+  animation: scaleup 1s;
+}
+
+@keyframes scaleup {
+  from {
+    transform: scale(1.2);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes starred {
+  from {
+    color: #604600;
+  }
+  to {
+    color: #d6ca2a;
+  }
 }
 </style>

@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@splidejs/vue-splide": "github:splidejs/vue-splide",
     "@tinymce/tinymce-vue": "^4.0.7",
     "axios": "^1.4.0",
     "socket.io": "^4.7.2",
