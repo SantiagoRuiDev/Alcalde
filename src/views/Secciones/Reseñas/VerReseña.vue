@@ -11,6 +11,7 @@ export default {
       rawDetalles: [],
       rawChasis: [],
       resenasBase: [],
+      token: this.$store.getters.getUserToken,
       filtros: {
         precio: "",
         etiqueta: "",
@@ -93,7 +94,9 @@ export default {
           this.rawDetalles = response.data.resenas[1];
           this.rawChasis = response.data.resenas[2];
 
-          this.preferencias = response.data.userPreferences[0].etiquetas;
+          if(this.token){
+            this.preferencias = response.data.userPreferences[0].etiquetas;
+          }
 
           this.orderResenas();
 
@@ -180,6 +183,7 @@ export default {
       // Una vez hecho el arreglo de preferencias se eliminaran las reseñas que esten sugeridas del arreglo de reseñas.
 
       // Crear arreglo de reseñas con preferencias
+      if(!this.token) return;
 
       let resenasSugeridas = [];
 
@@ -314,13 +318,13 @@ export default {
     </div>
   </div>
 
-  <Spinner v-if="loading" />
 
-  <div class="d-flex flex-column mx-auto mb-5" style="width: 80%;">
-    
-  <h1 class="fs-1">Sugeridos para ti</h1>
-  <small class="fs-6">Tus etiquetas preferidas son {{ preferencias }}</small>
+  <div class="d-flex flex-column mx-auto mb-5" style="width: 80%;" v-if="token">
+    <h1 class="fs-1">Sugeridos para ti</h1>
+    <small class="fs-6">Tus etiquetas preferidas son {{ preferencias }}</small>
   </div>
+
+  <Spinner v-if="loading" />
 
   <div class="container mb-3">
     <div v-for="resena in sugeridas" :key="resena.id">

@@ -41,6 +41,7 @@ export default {
     }},
     methods: {
         isBanned(){
+            if(!this.userToken) return;
             const url = 'http://localhost:3000/api/usuario/banned';
             const headers = { 'x-access-token': this.userToken }
             axios.get(url, { headers })
