@@ -49,8 +49,8 @@
   max-width: 600px; /* Establece el ancho máximo de la tarjeta según tus necesidades */
 }
 
-.card img {
-  max-width: 100%; /* Las imágenes se ajustarán al 100% del ancho disponible */
+ img {
+  max-width: 200px; /* Las imágenes se ajustarán al 100% del ancho disponible */
   height: auto; /* Mantiene la relación de aspecto original de la imagen */
 }
 </style>

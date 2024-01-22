@@ -4,6 +4,7 @@ export default {
     return {
       comunicados: [],
       loading: true,
+      userRol: this.$store.getters.getUserRol,
       URL: "http://localhost:3000/api/comunicados",
     };
   },
@@ -69,7 +70,14 @@ export default {
             <span class="material-symbols-outlined fs-1 mb-3"> verified </span>
             <h4 class="card-title">Reseñas</h4>
             <RouterLink
+              v-if="userRol == 'escritor' || userRol == 'admin' || userRol == 'superadmin'"
               to="/res"
+              class="btn btn-success border rounded-pill w-100 mt-2"
+              >Revisar</RouterLink
+            >
+            <RouterLink
+              v-else
+              to="/res/listar"
               class="btn btn-success border rounded-pill w-100 mt-2"
               >Revisar</RouterLink
             >
@@ -91,7 +99,14 @@ export default {
             <span class="material-symbols-outlined fs-1 mb-3"> article </span>
             <h4 class="card-title">Articulos</h4>
             <RouterLink
+              v-if="userRol == 'escritor' || userRol == 'admin' || userRol == 'superadmin'"
               to="/articulos"
+              class="btn btn-success border rounded-pill w-100 mt-2"
+              >Revisar</RouterLink
+            >
+            <RouterLink
+              v-else
+              to="/articulo/listar"
               class="btn btn-success border rounded-pill w-100 mt-2"
               >Revisar</RouterLink
             >
@@ -104,7 +119,14 @@ export default {
             </span>
             <h4 class="card-title">Listas</h4>
             <RouterLink
+              v-if="userRol == 'escritor' || userRol == 'admin' || userRol == 'superadmin'"
               to="/listas"
+              class="btn btn-success border rounded-pill w-100 mt-2"
+              >Revisar</RouterLink
+            >
+            <RouterLink
+              v-else
+              to="/listas/ver"
               class="btn btn-success border rounded-pill w-100 mt-2"
               >Revisar</RouterLink
             >

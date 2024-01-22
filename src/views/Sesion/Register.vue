@@ -52,6 +52,12 @@ export default {
       const regex = /\w+@\w+\.[a-z]/;
       return regex.test(correo);
     },
+    guardarRol(rol){
+      this.$store.commit('setRol', rol);
+    },
+    guardarToken(token) {
+      this.$store.commit('setToken', token);
+    },
     registrarCuenta() {
       const data = { nombre: this.usuario, correo: this.correo, contraseña: this.contraseña, ciudad: this.ciudad };
 
@@ -60,7 +66,9 @@ export default {
       axios
         .post("http://localhost:3000/api/usuario/create", data)
         .then((res) => {
-          this.$store.commit("setToken", res.data);
+          const data = res.data;
+          this.guardarRol(data.user.rol);
+          this.guardarToken(data.token);
         })
         .catch((err) => {
           if(err.response){

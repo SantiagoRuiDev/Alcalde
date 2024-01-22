@@ -31,11 +31,7 @@
                 type="button"
                 class="border-0 bg-transparent"
               >
-                <span
-                  class="material-symbols-outlined"
-                >
-                  reply
-                </span>
+                <span class="material-symbols-outlined"> reply </span>
               </button>
               <button
                 type="button"
@@ -60,25 +56,23 @@
               </button>
               <button
                 @click="deleteMessage(mensaje.id)"
+                v-if="
+                  rol == 'moderador' || rol == 'admin' || rol == 'superadmin'
+                "
                 type="button"
                 class="border-0 bg-transparent"
               >
-                <span
-                  class="material-symbols-outlined"
-                >
-                  delete
-                </span>
+                <span class="material-symbols-outlined"> delete </span>
               </button>
               <button
                 @click="strikeUsuario(mensaje.id_usuario)"
+                v-if="
+                  rol == 'moderador' || rol == 'admin' || rol == 'superadmin'
+                "
                 type="button"
                 class="border-0 bg-transparent"
               >
-                <span
-                  class="material-symbols-outlined"
-                >
-                  warning
-                </span>
+                <span class="material-symbols-outlined"> warning </span>
               </button>
             </div>
             <div v-if="mensaje.imagen != ''">
@@ -115,25 +109,52 @@
                     </div>
                     <button
                       @click="deleteReply(replica.id)"
+                      v-if="
+                        rol == 'moderador' ||
+                        rol == 'admin' ||
+                        rol == 'superadmin'
+                      "
                       type="button"
                       class="border-0 bg-transparent"
                     >
+                      <span class="material-symbols-outlined"> delete </span>
+                    </button>
+                    <button
+                      type="button"
+                      class="border-0 bg-transparent d-flex items-center mb-1 gap-2"
+                      v-if="replica.likes.length > 0"
+                    >
+                      {{ replica.likes.length }}
                       <span
                         class="material-symbols-outlined"
+                        @click="likeReply(replica.id)"
                       >
-                        delete
+                        thumb_up
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      class="border-0 bg-transparent"
+                      v-else
+                    >
+                      <span
+                        class="material-symbols-outlined"
+                        @click="likeReply(replica.id)"
+                      >
+                        thumb_up
                       </span>
                     </button>
                     <button
                       @click="strikeUsuario(replica.id_usuario)"
+                      v-if="
+                        rol == 'moderador' ||
+                        rol == 'admin' ||
+                        rol == 'superadmin'
+                      "
                       type="button"
                       class="border-0 bg-transparent"
                     >
-                      <span
-                        class="material-symbols-outlined"
-                      >
-                        warning
-                      </span>
+                      <span class="material-symbols-outlined"> warning </span>
                     </button>
                   </div>
 
@@ -260,14 +281,17 @@ export default {
       replyId: null,
       replicas: [],
       data: new FormData(),
+      rol: this.$store.getters.getUserRol,
       selectedFile: null,
       likes: [],
-      savedFile: {filename: "", path: ""},
+      likesReply: [],
+      savedFile: { filename: "", path: "" },
       URL_STRIKES: "http://localhost:3000/api/strikes/sancionar/",
       URL_SUBIR: "http://localhost:3000/api/chat/upload",
       URL_CREAR: "http://localhost:3000/api/foros/crear/mensaje/",
       URL_REPLY: "http://localhost:3000/api/foros/crear/reply/",
       URL_LIKE: "http://localhost:3000/api/foros/crear/like/",
+      URL_LIKEREPLY: "http://localhost:3000/api/foros/crear/like/reply/",
       URL_ELIMINAR: "http://localhost:3000/api/foros/delete/mensaje/",
       URL_ELIMINAR_REPLY: "http://localhost:3000/api/foros/delete/reply/",
     };
@@ -279,8 +303,7 @@ export default {
     await this.catchErrors();
   },
   methods: {
-
-    async catchErrors(){
+    async catchErrors() {
       socket.on("error", (error) => {
         this.$swal.fire({
           icon: "error",
@@ -288,13 +311,13 @@ export default {
           text: error.message,
         });
 
-        console.log(error)
-      })
+        console.log(error);
+      });
     },
     changeFile(event) {
       this.selectedFile = event.target.files[0];
 
-      if(this.savedFile.path != ""){
+      if (this.savedFile.path != "") {
         socket.emit("imageDelete", {
           path: this.savedFile.path,
         });
@@ -313,7 +336,7 @@ export default {
           return;
         })
         .catch((error) => {
-          console.log(error)
+          console.log(error);
           this.$swal.fire({
             icon: "error",
             title: "Oops...",
@@ -322,20 +345,21 @@ export default {
         });
     },
 
-    async saveImageLink(){
+    async saveImageLink() {
       socket.on("image", (data) => {
         this.savedFile.filename = data.filename;
         this.savedFile.path = data.path;
-      })
+      });
     },
 
-    async fetchMessages(){
+    async fetchMessages() {
       socket.on("joinForo", (messages) => {
         this.mensajes = messages.foro[0];
         this.replicas = messages.foro[1];
         this.likes = messages.foro[2];
+        this.likesReply = messages.foro[3];
         this.ordenarMensajes();
-      })
+      });
     },
 
     async cargarMensajes() {
@@ -418,24 +442,69 @@ export default {
       this.replyId = null;
     },
 
+    likeReply(id) {
+      this.axios
+        .post(
+          this.URL_LIKEREPLY + this.$route.params.id,
+          { id_reply: id },
+          {
+            headers: {
+              "x-access-token": this.$store.getters.getUserToken,
+            },
+          }
+        )
+        .then((response) => {
+          this.cargarMensajes();
+        });
+    },
+
     ordenarMensajes() {
       // La funcionalidad seria crear un objeto por cada mensaje y sus replicas
       // {mensaje: mensaje, replicas: [replicas]} En el arreglo this.mensajes;
 
+      // Necesito agregarle los likes a cada replica
+
       let mapNewMensajes = [];
 
       this.mensajes.forEach((mensaje) => {
-        mapNewMensajes.push({
+        let newMensaje = {
           id: mensaje.id,
           id_usuario: mensaje.id_usuario,
           nombre: mensaje.nombre,
-          imagen: mensaje.imagen,
           mensaje: mensaje.mensaje,
-          likes: this.likes.filter((like) => like.id_mensaje == mensaje.id),
-          replicas: this.replicas.filter(
-            (replica) => replica.id_mensaje == mensaje.id
-          ),
+          imagen: mensaje.imagen,
+          replicas: [],
+          likes: [],
+        };
+
+        this.replicas.forEach((replica) => {
+          if (replica.id_mensaje == mensaje.id) {
+            let newReplica = {
+              id: replica.id,
+              id_usuario: replica.id_usuario,
+              nombre: replica.nombre,
+              mensaje: replica.mensaje,
+              imagen: replica.imagen,
+              likes: [],
+            };
+
+            this.likesReply.forEach((like) => {
+              if (like.id_reply == replica.id) {
+                newReplica.likes.push(like);
+              }
+            });
+
+            newMensaje.replicas.push(newReplica);
+          }
         });
+
+        this.likes.forEach((like) => {
+          if (like.id_mensaje == mensaje.id) {
+            newMensaje.likes.push(like);
+          }
+        });
+
+        mapNewMensajes.push(newMensaje);
       });
 
       this.mensajes = mapNewMensajes;
@@ -443,24 +512,24 @@ export default {
 
     crearMensaje() {
       if (this.reply) {
-        socket.emit("createReply", ({
+        socket.emit("createReply", {
           room: this.$route.params.id,
           text: this.mensaje,
           file: this.savedFile,
           token: this.$store.getters.getUserToken,
           id_reply: this.replyId,
-        }))
+        });
       } else {
-        socket.emit("createMessage", ({
+        socket.emit("createMessage", {
           room: this.$route.params.id,
           text: this.mensaje,
           file: this.savedFile,
           token: this.$store.getters.getUserToken,
-        }))
+        });
       }
 
       this.mensaje = "";
-      this.savedFile = {filename: "", path: ""};
+      this.savedFile = { filename: "", path: "" };
       this.selectedFile = null;
     },
   },

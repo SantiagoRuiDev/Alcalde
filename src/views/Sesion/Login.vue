@@ -43,6 +43,9 @@ export default {
       const regex = /\S+@\S+\.\S+/;
       return regex.test(correo);
     },
+    guardarRol(rol){
+      this.$store.commit('setRol', rol);
+    },
     guardarToken(token) {
       this.$store.commit('setToken', token);
     },
@@ -54,8 +57,9 @@ export default {
       this.axios
                   .post("http://localhost:3000/api/usuario/login", data)
                    .then(res => {
-                    const token = res.data;
-                    this.guardarToken(token);
+                    const data = res.data;
+                    this.guardarRol(data.user.rol);
+                    this.guardarToken(data.token);
                    })
                    .catch(err => {
                     if(err.response){

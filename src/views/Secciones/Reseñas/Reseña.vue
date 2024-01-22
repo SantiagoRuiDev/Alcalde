@@ -15,13 +15,18 @@ export default {
       URL_SUBFORO: "http://localhost:3000/api/subforo/",
       URL_CALIFICAR: "http://localhost:3000/api/calificaciones",
       URL_STRIKES: "http://localhost:3000/api/strikes/sancionar/",
+      URL_REGLAS: "http://localhost:3000/api/foros/regla",
+      URL_LIKEREPLY: "http://localhost:3000/api/subforo/like/reply/",
       loading: true,
+      reglas: [],
       cantidadVotos: 0,
+      likesReplies: [],
       detalles: [],
       carreteImages: [],
       comentarios: [],
       likes: [],
       replicas: [],
+      rol: this.$store.getters.getUserRol,
       subforoSelected: -1,
       messageFile: null,
       replyMode: false,
@@ -50,23 +55,34 @@ export default {
   created: async function () {
     await this.joinRoomResena();
     await this.fetchChanges();
+    this.getReglas();
   },
 
   methods: {
+    getReglas() {
+      this.axios
+        .get(this.URL_REGLAS, {
+          headers: {
+            "x-access-token": this.$store.getters.getUserToken,
+          },
+        })
+        .then((response) => {
+          this.reglas = response.data;
+        });
+    },
 
     async fetchChanges() {
       socket.on("resenaUpdate", (id) => {
         if (id == this.$route.params.id) {
           this.getResena();
-          if(this.subforoSelected != -1){
-            
-              this.seeSubforo(this.$route.params.id, this.subforoSelected);
+          if (this.subforoSelected != -1) {
+            this.seeSubforo(this.$route.params.id, this.subforoSelected);
           }
         }
       });
     },
 
-    async notifyUsers(){
+    async notifyUsers() {
       await socket.emit("resenaUpdate", this.$route.params.id);
     },
 
@@ -255,11 +271,12 @@ export default {
     ordenarComentarios() {
       // Debe verse asi
       // {texto:, imagen:, usuario:, likes: [], reply: []}
+      // Las replicas tambien tienen likes
 
       let comentariosStructure = [];
 
       this.comentarios.forEach((comentario) => {
-        comentariosStructure.push({
+        let newComentario = {
           id: comentario.id,
           id_usuario: comentario.id_usuario,
           texto: comentario.texto,
@@ -269,10 +286,26 @@ export default {
           likes: this.likes.filter(
             (like) => like.id_comentario == comentario.id
           ),
-          replicas: this.replicas.filter(
-            (replica) => replica.id_comentario == comentario.id
-          ),
+          replicas: []
+        }
+
+        this.replicas.forEach((replica) => {
+          if (replica.id_comentario == comentario.id) {
+            newComentario.replicas.push({
+              id: replica.id,
+              id_usuario: replica.id_usuario,
+              texto: replica.texto,
+              imagen: replica.imagen,
+              nombre: replica.nombre,
+              subforo: replica.id_subforo,
+              likes: this.likesReplies.filter(
+                (like) => like.id_reply == replica.id
+              ),
+            });
+          }
         });
+
+        comentariosStructure.push(newComentario);
       });
 
       this.comentarios = comentariosStructure;
@@ -317,7 +350,7 @@ export default {
             this.message = "";
             this.messageFile = null;
             this.seeSubforo(this.$route.params.id, this.subforoSelected);
-             this.notifyUsers();
+            this.notifyUsers();
           })
           .catch((error) => {
             this.$swal.fire({
@@ -358,7 +391,7 @@ export default {
             this.message = "";
             this.messageFile = null;
             this.seeSubforo(this.$route.params.id, this.subforoSelected);
-          this.notifyUsers();
+            this.notifyUsers();
           })
           .catch((error) => {
             this.$swal.fire({
@@ -382,8 +415,40 @@ export default {
           this.comentarios = response.data[0];
           this.likes = response.data[1];
           this.replicas = response.data[2];
+          this.likesReplies = response.data[3];
           this.subforoSelected = id;
           this.ordenarComentarios();
+        })
+        .catch((error) => {
+          this.$swal.fire({
+            icon: "error",
+            title: error.response.data.error,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+        });
+    },
+
+    likeReply(subforo, replica) {
+      this.axios
+        .post(
+          this.URL_LIKEREPLY + subforo,
+          {id_reply: replica},
+          {
+            headers: {
+              "x-access-token": this.$store.getters.getUserToken,
+            },
+          }
+        )
+        .then((response) => {
+          this.$swal.fire({
+            icon: "success",
+            title: response.data.message,
+            showConfirmButton: false,
+            timer: 1500,
+          });
+          this.seeSubforo(this.$route.params.id, this.subforoSelected);
+          this.notifyUsers();
         })
         .catch((error) => {
           this.$swal.fire({
@@ -526,7 +591,11 @@ export default {
 
 <template>
   <div class="card mx-auto" v-for="resena in resenas" :key="resena.id">
-    <Slider :portada="resena.imagen" :video="resena.video" :carrete="carreteImages"/>
+    <Slider
+      :portada="resena.imagen"
+      :video="resena.video"
+      :carrete="carreteImages"
+    />
 
     <div class="card-body pt-0 px-0">
       <div
@@ -1000,72 +1069,89 @@ export default {
 
       <hr class="mt-2 mx-3" />
 
-      <div
-        class="detallesBox"
-        v-for="detalle in detalles"
-        :key="detalle.id"
-      >
+      <div class="detallesBox" v-for="detalle in detalles" :key="detalle.id">
+        <div
+          class="d-flex flex-column justify-content-between w-25 mb-3 mx-auto text-center"
+        >
+          <span class="text-muted">Rango de Precio</span>
+          <span class="text-muted fs-6"
+            >${{ detalle.precio_inicial }} - ${{ detalle.precio_final }}</span
+          >
+        </div>
 
-      <div class="d-flex flex-column justify-content-between w-25 mb-3 mx-auto text-center">
-        <span class="text-muted">Rango de Precio</span> 
-        <span class="text-muted fs-6">${{ detalle.precio_inicial }} - ${{ detalle.precio_final }}</span>
-      </div>
+        <div
+          class="d-flex flex-column justify-content-between w-25 mb-3 mx-auto text-center"
+        >
+          <span class="text-muted">Clasificación</span>
+          <span class="text-muted fs-6">{{ detalle.etiquetas }}</span>
+        </div>
 
-      <div class="d-flex flex-column justify-content-between w-25 mb-3 mx-auto text-center">
-        <span class="text-muted">Clasificación</span> 
-        <span class="text-muted fs-6">{{ detalle.etiquetas }}</span>
-      </div>
-
-      <div class="caracteristicas"> 
-        <div class="d-flex flex-row justify-content-between px-3 pb-4 mx-auto">
-          <div class="d-flex flex-column">
-            <span class="text-muted">Marca</span
-            ><small class="text-muted fs-6">{{ detalle.marca }}</small>
+        <div class="caracteristicas">
+          <div
+            class="d-flex flex-row justify-content-between px-3 pb-4 mx-auto"
+          >
+            <div class="d-flex flex-column">
+              <span class="text-muted">Marca</span
+              ><small class="text-muted fs-6">{{ detalle.marca }}</small>
+            </div>
+          </div>
+          <div
+            class="d-flex flex-row justify-content-between px-3 pb-4 mx-auto"
+          >
+            <div class="d-flex flex-column">
+              <span class="text-muted">Modelo</span
+              ><small class="text-muted fs-6">{{ detalle.modelo }}</small>
+            </div>
+          </div>
+          <div
+            class="d-flex flex-row justify-content-between px-3 pb-4 mx-auto"
+          >
+            <div class="d-flex flex-column">
+              <span class="text-muted">Año</span
+              ><small class="text-muted fs-6">{{ detalle.ano }}</small>
+            </div>
+          </div>
+          <div
+            class="d-flex flex-row justify-content-between px-3 pb-4 mx-auto"
+          >
+            <div class="d-flex flex-column">
+              <span class="text-muted">HP</span
+              ><small class="text-muted fs-6">{{ detalle.hp }}</small>
+            </div>
+          </div>
+          <div
+            class="d-flex flex-row justify-content-between px-3 pb-4 mx-auto"
+          >
+            <div class="d-flex flex-column">
+              <span class="text-muted">Combustible</span
+              ><small class="text-muted fs-6">{{ motor[0].combustible }}</small>
+            </div>
+          </div>
+          <div
+            class="d-flex flex-row justify-content-between px-3 pb-4 mx-auto"
+          >
+            <div class="d-flex flex-column">
+              <span class="text-muted">Puertas</span
+              ><small class="text-muted fs-6">{{ detalle.puertas }}</small>
+            </div>
+          </div>
+          <div
+            class="d-flex flex-row justify-content-between px-3 pb-4 mx-auto"
+          >
+            <div class="d-flex flex-column">
+              <span class="text-muted">Transmision</span
+              ><small class="text-muted fs-6">{{ chasis[0].tranmision }}</small>
+            </div>
+          </div>
+          <div
+            class="d-flex flex-row justify-content-between px-3 pb-4 mx-auto"
+          >
+            <div class="d-flex flex-column">
+              <span class="text-muted">Motor</span
+              ><small class="text-muted fs-6">{{ motor[0].cilindros }}</small>
+            </div>
           </div>
         </div>
-        <div class="d-flex flex-row justify-content-between px-3 pb-4 mx-auto">
-          <div class="d-flex flex-column">
-            <span class="text-muted">Modelo</span
-            ><small class="text-muted fs-6">{{ detalle.modelo }}</small>
-          </div>
-        </div>
-        <div class="d-flex flex-row justify-content-between px-3 pb-4 mx-auto">
-          <div class="d-flex flex-column">
-            <span class="text-muted">Año</span
-            ><small class="text-muted fs-6">{{ detalle.ano }}</small>
-          </div>
-        </div>
-        <div class="d-flex flex-row justify-content-between px-3 pb-4 mx-auto">
-          <div class="d-flex flex-column">
-            <span class="text-muted">HP</span
-            ><small class="text-muted fs-6">{{ detalle.hp }}</small>
-          </div>
-        </div>
-        <div class="d-flex flex-row justify-content-between px-3 pb-4 mx-auto">
-          <div class="d-flex flex-column">
-            <span class="text-muted">Combustible</span
-            ><small class="text-muted fs-6">{{ motor[0].combustible }}</small>
-          </div>
-        </div>
-        <div class="d-flex flex-row justify-content-between px-3 pb-4 mx-auto">
-          <div class="d-flex flex-column">
-            <span class="text-muted">Puertas</span
-            ><small class="text-muted fs-6">{{ detalle.puertas }}</small>
-          </div>
-        </div>
-        <div class="d-flex flex-row justify-content-between px-3 pb-4 mx-auto">
-          <div class="d-flex flex-column">
-            <span class="text-muted">Transmision</span
-            ><small class="text-muted fs-6">{{ chasis[0].tranmision }}</small>
-          </div>
-        </div>
-        <div class="d-flex flex-row justify-content-between px-3 pb-4 mx-auto">
-          <div class="d-flex flex-column">
-            <span class="text-muted">Motor</span
-            ><small class="text-muted fs-6">{{ motor[0].cilindros }}</small>
-          </div>
-        </div>
-      </div>
       </div>
 
       <div class="detalles">
@@ -1378,6 +1464,83 @@ export default {
         </div>
 
         <div
+          class="modal fade"
+          id="modalId"
+          tabindex="-1"
+          role="dialog"
+          aria-labelledby="modalTitleId"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h3 class="modal-title" id="modalTitleId">
+                  Reglas de los Foros
+                </h3>
+                <button
+                  type="button"
+                  class="btn-close"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div class="modal-body">
+                <div class="container-fluid">
+                  <p v-if="reglas.length == 0">No hay reglas al momento...</p>
+
+                  <div class="accordion" id="accordionExample" v-else>
+                    <div
+                      class="accordion-item"
+                      v-for="regla in reglas"
+                      :key="regla.id"
+                    >
+                      <h3 class="accordion-header" :id="'heading' + regla.id">
+                        <button
+                          class="accordion-button"
+                          type="button"
+                          data-bs-toggle="collapse"
+                          :data-bs-target="'#' + regla.id"
+                          aria-expanded="false"
+                          aria-controls="collapseOne"
+                        >
+                          {{ regla.nombre }}
+                        </button>
+                      </h3>
+                      <div
+                        :id="regla.id"
+                        class="accordion-collapse collapse show"
+                        :aria-labelledby="'heading' + regla.id"
+                        data-bs-parent="#accordionExample"
+                      >
+                        <div class="accordion-body">
+                          {{ regla.contenido }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button
+                  type="button"
+                  class="btn btn-secondary"
+                  data-bs-dismiss="modal"
+                >
+                  Cerrar
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-success"
+                  data-bs-dismiss="modal"
+                >
+                  Entendido
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
           class="accordion accordion-flush w-75 mx-auto"
           id="accordionFlushExample"
         >
@@ -1609,6 +1772,25 @@ export default {
             Silenciar este subforo
           </button>
         </div>
+
+        <div class="d-flex flex-row titulosubforo">
+          <h3 class="fs-5 mb-3" v-if="subforoSelected == 0">
+            Fallos y mecanica
+          </h3>
+          <h3 class="fs-5 mb-3" v-if="subforoSelected == 1">
+            Consejos y dudas
+          </h3>
+          <h3 class="fs-5 mb-3" v-if="subforoSelected == 2">Imagenes</h3>
+          <button
+            class="text-center d-flex align-items-center btn"
+            v-on:click="showReglas"
+            data-bs-toggle="modal"
+            data-bs-target="#modalId"
+          >
+            <span class="material-symbols-outlined mx-auto"> info </span>
+          </button>
+        </div>
+
         <div class="" v-if="comentarios.length == 0">
           <p>No hay comentarios en este subforo!</p>
         </div>
@@ -1650,9 +1832,9 @@ export default {
               <button
                 type="button"
                 class="border-0 bg-transparent d-flex items-center mb-1 gap-2"
-                v-if="likes.length > 0"
+                v-if="comentario.likes.length > 0"
               >
-                {{ likes.length }}
+                {{ comentario.likes.length }}
                 <span
                   class="material-symbols-outlined"
                   @click="likeMessage(comentario.subforo, comentario.id)"
@@ -1669,14 +1851,14 @@ export default {
                 </span>
               </button>
               <button
-                @click="deleteMessage(comentario.id)"
+                @click="deleteMessage(comentario.id)"  v-if="rol == 'moderador' || rol == 'admin' || rol == 'superadmin'"
                 type="button"
                 class="border-0 bg-transparent"
               >
                 <span class="material-symbols-outlined"> delete </span>
               </button>
               <button
-                @click="strikeUsuario(comentario.id_usuario)"
+                @click="strikeUsuario(comentario.id_usuario)"  v-if="rol == 'moderador' || rol == 'admin' || rol == 'superadmin'"
                 type="button"
                 class="border-0 bg-transparent"
               >
@@ -1684,7 +1866,11 @@ export default {
               </button>
             </div>
             <div v-if="comentario.imagen != ''">
-              <img :src="comentario.imagen" class="comentarioImagen" alt="Chat Message Image" />
+              <img
+                :src="comentario.imagen"
+                class="comentarioImagen"
+                alt="Chat Message Image"
+              />
             </div>
 
             <div class="" v-if="comentario.replicas.length > 0">
@@ -1721,14 +1907,35 @@ export default {
                       class="border-0 bg-transparent"
                     >
                       <span
-                        class="material-symbols-outlined"
+                        class="material-symbols-outlined"  v-if="rol == 'moderador' || rol == 'admin' || rol == 'superadmin'"
                         @click="deleteReply(replica.id)"
                       >
                         delete
                       </span>
                     </button>
                     <button
-                      @click="strikeUsuario(replica.id_usuario)"
+                      type="button"
+                      class="border-0 bg-transparent d-flex items-center mb-1 gap-2"
+                      v-if="replica.likes.length > 0"
+                    >
+                      {{ replica.likes.length }}
+                      <span
+                        class="material-symbols-outlined"
+                        @click="likeReply(comentario.subforo, replica.id)"
+                      >
+                        thumb_up
+                      </span>
+                    </button>
+                    <button type="button" class="border-0 bg-transparent" v-else>
+                      <span
+                        class="material-symbols-outlined"
+                        @click="likeReply(comentario.subforo, replica.id)"
+                      >
+                        thumb_up
+                      </span>
+                    </button>
+                    <button
+                      @click="strikeUsuario(replica.id_usuario)"  v-if="rol == 'moderador' || rol == 'admin' || rol == 'superadmin'"
                       type="button"
                       class="border-0 bg-transparent"
                     >
@@ -1907,12 +2114,11 @@ iframe {
   text-align: center;
 }
 
-
 .calificacionesBox {
-    display: flex;
-    flex-direction: row;
-    gap: 25px;
-    justify-content: center;
+  display: flex;
+  flex-direction: row;
+  gap: 25px;
+  justify-content: center;
 }
 
 .detallesBox {
@@ -1925,13 +2131,13 @@ iframe {
   flex-direction: row;
 }
 
-@media only screen and (max-width: 1200px){
+@media only screen and (max-width: 1200px) {
   .calificacionesBox {
     display: grid;
   }
-.caracteristicas {
-  flex-direction: column;
-}
+  .caracteristicas {
+    flex-direction: column;
+  }
 }
 
 @media only screen and (max-width: 800px) {
@@ -2004,24 +2210,21 @@ small.justify-content-center {
   overflow-x: scroll;
 }
 
-
 .comentarioImagen {
   max-width: 600px;
   overflow-x: scroll;
 }
 
 @media only screen and (max-width: 600px) {
-  
-.reply-image {
-  height: 200px;
-  max-width: 300px;
-  overflow-x: scroll;
-}
-.comentarioImagen {
-  max-width: 300px;
-  overflow-x: scroll;
-}
-
+  .reply-image {
+    height: 200px;
+    max-width: 300px;
+    overflow-x: scroll;
+  }
+  .comentarioImagen {
+    max-width: 300px;
+    overflow-x: scroll;
+  }
 }
 .car-image {
   height: 100%;
@@ -2089,6 +2292,12 @@ input[name="star"]:checked ~ label .star {
   color: #ebd61b;
 }
 
+.titulosubforo {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
 input[name="star"]:checked + label .star {
   animation: starred 0.5s;
 }

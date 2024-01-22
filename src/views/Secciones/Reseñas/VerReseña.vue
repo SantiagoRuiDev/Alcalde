@@ -6,9 +6,11 @@ export default {
     return {
       param: "",
       resenas: [],
+      sugeridas: [],
       rawResenas: [],
       rawDetalles: [],
       rawChasis: [],
+      resenasBase: [],
       filtros: {
         precio: "",
         etiqueta: "",
@@ -16,6 +18,7 @@ export default {
         ancho: "",
         largo: "",
       },
+      preferencias: [],
       URL: "http://localhost:3000/api/resenas/",
       URL_BUSCAR: "http://localhost:3000/api/resenas/buscar/",
       loading: true,
@@ -28,7 +31,7 @@ export default {
 
 
     filtrar(){
-      let resenas = this.resenas;
+      let resenas = this.resenasBase;
 
       // Filtrar por precio
       if(this.filtros.precio != ""){
@@ -86,13 +89,16 @@ export default {
         })
         .then((response) => {
           // Ordenar reseñas y estructurar
-          this.rawResenas = response.data[0];
-          this.rawDetalles = response.data[1];
-          this.rawChasis = response.data[2];
+          this.rawResenas = response.data.resenas[0];
+          this.rawDetalles = response.data.resenas[1];
+          this.rawChasis = response.data.resenas[2];
+
+          this.preferencias = response.data.userPreferences[0].etiquetas;
 
           this.orderResenas();
 
-          this.loading = response.data.length > 0 ? false : true;
+
+          this.loading = response.data.resenas.length > 0 ? false : true;
         })
         .catch((error) => {
           console.log(error);
@@ -106,6 +112,10 @@ export default {
         La resena tiene un id_detalles para saber que detalles pertenencen.
         Es necesario conectar todos los arreglos y crear un arreglo con objetos que contengan toda la informacion.
       */
+
+      // Se creara 2 arreglos uno de reseñas normales, y otros de reseñas con preferencias (Sugeridas)
+      // Donde se mostraran las reseñas que en sus etiquetas concuadran con las preferencias del usuario
+      // En la de reseñas normales se excluira a las reseñas que esten en la de reseñas con preferencias
 
       // Crear arreglo de objetos con toda la informacion
       let resenas = [];
@@ -163,7 +173,47 @@ export default {
 
         this.resenas = resenas;
       });
+      this.resenasBase = resenas;
 
+
+      // El arreglo de reseñas con preferencias se basaran en base a las etiquetas dentro de los detalles y las preferencias del usuario.
+      // Una vez hecho el arreglo de preferencias se eliminaran las reseñas que esten sugeridas del arreglo de reseñas.
+
+      // Crear arreglo de reseñas con preferencias
+
+      let resenasSugeridas = [];
+
+      // Recorrer arreglo de reseñas
+
+      this.resenas.forEach((resena) => {
+        // Recorrer arreglo de detalles
+        resena.detalles.forEach((detalle) => {
+          // Recorrer arreglo de preferencias
+          if(this.preferencias.toLowerCase().includes(detalle.etiqueta.toLowerCase())){
+            // Agregar reseña al arreglo de reseñas sugeridas
+            resenasSugeridas.push(resena);
+          }
+        });
+      });
+
+      // Eliminar reseñas sugeridas del arreglo de reseñas  
+
+      resenasSugeridas.forEach((resenaSugerida) => {
+        // Recorrer arreglo de reseñas
+        this.resenas.forEach((resena, index) => {
+          // Si el id de la reseña es igual al id de la reseña sugerida
+          if (resena.id == resenaSugerida.id) {
+            // Eliminar reseña del arreglo de reseñas
+            this.resenas.splice(index, 1);
+          }
+        });
+      });
+
+      // Agregar reseñas sugeridas al arreglo de reseñas
+      
+      this.sugeridas = resenasSugeridas;
+
+    
     },
 
     buscarResena() {
@@ -265,6 +315,37 @@ export default {
   </div>
 
   <Spinner v-if="loading" />
+
+  <div class="d-flex flex-column mx-auto mb-5" style="width: 80%;">
+    
+  <h1 class="fs-1">Sugeridos para ti</h1>
+  <small class="fs-6">Tus etiquetas preferidas son {{ preferencias }}</small>
+  </div>
+
+  <div class="container mb-3">
+    <div v-for="resena in sugeridas" :key="resena.id">
+      <div class="card-sl">
+        <div class="card-image">
+          <img :src="resena.imagen" />
+        </div>
+
+        <div class="card-heading">
+          {{ resena.titulo }}
+        </div>
+        <div class="card-text">
+          {{ resena.descripcion }}
+        </div>
+        <div class="card-text">Redactada por: {{ resena.id_usuario }}</div>
+        <RouterLink
+          :to="{ name: 'reseñaarticulo', params: { id: resena.id } }"
+          class="card-button"
+          >Revisar reseña</RouterLink
+        >
+      </div>
+    </div>
+  </div>
+  
+  <hr class="my-2 w-75 mx-auto">
 
   <div class="container">
     <div v-for="resena in resenas" :key="resena.id">

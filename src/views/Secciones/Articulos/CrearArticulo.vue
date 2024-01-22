@@ -139,6 +139,8 @@ export default {
                 api-key="4sy281yb48j3w5jel1fikdndfns9nmj1t7xjd76yyf6ok452"
                 :init="{
                   menubar: false,
+                  language: 'es_MX',
+                  content_style: 'img { max-width: 100%; height: auto; }' ,
                   plugins: 'lists link image emoticons preview imagetools',
                   toolbar:
                     'styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist | link image emoticons image_upload_handler',

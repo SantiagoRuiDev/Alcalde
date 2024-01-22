@@ -2,12 +2,33 @@
 export default {
   data() {
     return {
-      resena: {},
+      resena: {
+        titulo: "",
+        descripcion: "",
+        marca: "",
+        modelo: "",
+        ano: "",
+        hp: "",
+        puertas: "",
+        video: "",
+        inicial: "",
+        final: ""
+      },
       selectedFile: null,
       URL: "http://localhost:3000/api/resenas/crear",
       alertaMessage: "",
       carrete: [],
       id: "",
+      etiquetas: {
+        estudiantes: "",
+        economico: "",
+        rendidor: "",
+        cuatro: "",
+        carga: "",
+        pickup: "",
+        familiar: "",
+        deportivo: ""
+      },
       motor: {
         combustible: "",
         potencia: "",
@@ -114,7 +135,36 @@ export default {
         seguridad: this.seguridad,
         entretenimiento: this.entretenimiento,
         confort: this.confort,
+        etiquetas: this.etiquetas,
       }
+
+      // Chequear si el objeto sus valores estan vacios o si los objetos dentro del object estan vacios
+      
+      if(Object.values(this.resena).some(item => item === "")) return this.$swal.fire('Error', 'Debes llenar todos los campos de la reseña', 'error');
+
+      if(Object.values(this.motor).some(item => item === "")) return this.$swal.fire('Error', 'Debes llenar todos los campos del motor', 'error');
+
+      if(Object.values(this.perfomance).some(item => item === "")) return this.$swal.fire('Error', 'Debes llenar todos los campos de perfomance', 'error');
+
+      if(Object.values(this.chasis).some(item => item === "")) return this.$swal.fire('Error', 'Debes llenar todos los campos del chasis', 'error');
+
+      if(Object.values(this.capacidades).some(item => item === "")) return this.$swal.fire('Error', 'Debes llenar todos los campos de capacidades', 'error');
+
+      if(Object.values(this.seguridad).some(item => item === "")) return this.$swal.fire('Error', 'Debes llenar todos los campos de seguridad', 'error');
+
+      if(Object.values(this.entretenimiento).some(item => item === "")) return this.$swal.fire('Error', 'Debes llenar todos los campos de entretenimiento', 'error');
+
+      if(Object.values(this.confort).some(item => item === "")) return this.$swal.fire('Error', 'Debes llenar todos los campos de confort', 'error');
+
+      // Al menos debe tener una etiqueta el objeto
+      const etiquetas = Object.values(this.etiquetas);
+
+      if(Object.values(etiquetas).every(item => item === "")) return this.$swal.fire('Error', 'Debes seleccionar al menos una etiqueta', 'error');
+
+      if(this.selectedFile == null) return this.$swal.fire('Error', 'Debes subir una imagen', 'error');
+
+      if(this.carrete.length == 0) return this.$swal.fire('Error', 'Debes subir al menos una imagen al carrete', 'error');
+
 
       await this.axios
         .post(this.URL, object, {
@@ -796,15 +846,40 @@ export default {
               </div>
               <div class="mb-3">
                 <label for="" class="form-label"
-                  >Etiquetas (Separadas por coma)</label
+                  >Etiquetas</label
                 >
-                <input
-                  type="text"
-                  class="form-control"
-                  aria-describedby="helpId"
-                  placeholder="Ejemplo: Rendidor, Barato, Ecologico"
-                  v-model="resena.etiquetas"
-                />
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="Economico" id="Economico" v-model="etiquetas.economico"/>
+                  <label class="form-check-label" for="Economico"> Economico </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="Estudiantes" id="Estudiantes"  v-model="etiquetas.estudiantes"/>
+                  <label class="form-check-label" for="Estudiantes"> Estudiantes </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="Rendidor" id="Rendidor" v-model="etiquetas.rendidor" />
+                  <label class="form-check-label" for="Rendidor"> Rendidor </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="4x4" id="4x4"  v-model="etiquetas.cuatro"/>
+                  <label class="form-check-label" for="4x4"> 4x4 </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="Carga" id="Carga"  v-model="etiquetas.carga"/>
+                  <label class="form-check-label" for="Carga"> Carga </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="Pickup" id="Pickup"  v-model="etiquetas.pickup"/>
+                  <label class="form-check-label" for="Pickup"> Pickup </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="Deportivo" id="Deportivo"  v-model="etiquetas.deportivo"/>
+                  <label class="form-check-label" for="Deportivo"> Deportivo </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="checkbox" value="Familiar" id="Familiar"  v-model="etiquetas.familiar"/>
+                  <label class="form-check-label" for="Familiar"> Familiar </label>
+                </div>
               </div>
               <div class="mb-3">
                 <label for="" class="form-label"

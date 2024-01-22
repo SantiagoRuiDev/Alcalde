@@ -15,6 +15,7 @@ export default {
         return {
             auth: false,
             userToken: this.$store.getters.getUserToken,
+            rol: this.$store.getters.getUserRol,
             admin: false
         }
     },
@@ -66,16 +67,8 @@ export default {
                 });
         },
         getAdminSesion(){
-            const url = 'http://localhost:3000/api/usuario/admin';
-            const headers = { 'x-access-token': this.userToken }
-            axios.post(url, {}, { headers })
-                .then(response => {
-                    this.admin = response.data.admin;
-                })
-                .catch(error => {
-                // Manejar el error
-                });
-            }
+            this.admin = this.rol == 'admin' || this.rol == 'superadmin' ? true : false;
+        }
     }
 }
 
