@@ -282,12 +282,20 @@ export default {
       </div>
       <div class="input-group-text d-flex gap-3">
         <label for="filtro">Filtrar por Etiqueta</label>
-        <input
-          class="form-control input mt-0"
-          type="text"
+        <select
+          class="mt-0 bg-transparent rounded border-0"
           id="filtro"
           v-model="filtros.etiqueta"
-        />
+        >
+        <option value="Deportivo" selected>Deportivo</option>
+        <option value="Familiar">Familiar</option>
+        <option value="Carga">Carga</option>
+        <option value="Economico">Economico</option>
+        <option value="Rendidor">Rendidor</option>
+        <option value="4x4">4x4</option>
+        <option value="Estudiantes">Estudiantes</option>
+        <option value="Pickup">Pickup</option>
+      </select>
       </div>
       <div class="input-group-text d-flex gap-3">
         <label for="filtro">Filtrar por Altura del Piso</label>

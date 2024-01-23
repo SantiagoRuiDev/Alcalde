@@ -59,13 +59,13 @@ export default {
         },
 
         crearVersus(){
-            this.data.append('image', this.selectedFile);
-            let parsedVersus = JSON.stringify(this.versus);
-            this.data.append('resenas', parsedVersus);
-
             if(this.versus.length < 2) return this.$swal.fire('Error', 'Debes tener dos coches en el versus', 'error');
 
             if(this.selectedFile == null) return this.$swal.fire('Error', 'Debes subir una imagen', 'error');
+            
+            this.data.append('image', this.selectedFile);
+            let parsedVersus = JSON.stringify(this.versus);
+            this.data.append('resenas', parsedVersus);
 
             if(this.versus.length > 1 && this.selectedFile != null){
                 this.axios.post(this.URL_CREAR, this.data, {

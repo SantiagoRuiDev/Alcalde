@@ -36,14 +36,14 @@ export default {
               .catch(error => this.$swal.fire('Error', error.response.data.error, 'error'));
         },
         createLista(){
+            if(this.lista.titulo.trim() == '' || this.lista.subtitulo.trim() == ''|| this.selectedFile == null || this.resenas == []) return this.$swal.fire('Error', 'Ingrese todos los campos', 'error');
+           
             this.data.append('titulo', this.lista.titulo);
             this.data.append('subtitulo', this.lista.subtitulo);
             this.data.append('image', this.selectedFile);
             let resenas = JSON.stringify(this.resenas);
             this.data.append('resenas', resenas);
 
-            if(this.lista.titulo.trim() == '' || this.lista.subtitulo.trim() == ''|| this.selectedFile == null || this.resenas == []) return this.$swal.fire('Error', 'Ingrese todos los campos', 'error');
-           
             this.axios.post(this.URL_CREAR, this.data, {
                 headers: {
                     'x-access-token': this.$store.getters.getUserToken
