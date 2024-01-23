@@ -18,6 +18,7 @@ export default {
         altura_piso: "",
         ancho: "",
         largo: "",
+        marca: "",
       },
       preferencias: [],
       URL: "http://localhost:3000/api/resenas/",
@@ -33,6 +34,12 @@ export default {
 
     filtrar(){
       let resenas = this.resenasBase;
+      // Filtrar por marca
+      if(this.filtros.marca != ""){
+        resenas = resenas.filter(resena => {
+          return resena.detalles[0].marca.toLowerCase().includes(this.filtros.marca.toLowerCase());
+        });
+      }
 
       // Filtrar por precio
       if(this.filtros.precio != ""){
@@ -94,7 +101,6 @@ export default {
           this.rawDetalles = response.data.resenas[1];
           this.rawChasis = response.data.resenas[2];
 
-          console.log(response.data)
           if(this.token){
             this.preferencias = response.data.userPreferences[0].etiquetas;
           }
@@ -148,6 +154,7 @@ export default {
               precioIni: detalle.precio_inicial,
               precioFin: detalle.precio_final,
               etiqueta: detalle.etiquetas,
+              marca: detalle.marca,
             };
 
             // Recorrer arreglo de chasis
@@ -271,6 +278,15 @@ export default {
 
     <!-- checkbox -->
     <div class="input-group mt-2 p-2 d-flex gap-2">
+      <div class="input-group-text d-flex gap-3">
+        <label for="marca">Filtrar por Marca</label>
+        <input
+          class="form-control input mt-0"
+          type="text"
+          id="marca"
+          v-model="filtros.marca"
+        />
+      </div>
       <div class="input-group-text d-flex gap-3">
         <label for="filtro">Filtrar por Precio</label>
         <input
