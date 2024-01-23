@@ -43,6 +43,7 @@
           </div>
           <div
             class="col-md-1 forum-info"
+            v-if="rol == 'moderador' || rol == 'admin' || rol == 'superadmin'"
             v-on:click="silenciarForo(foro.foro_id)"
           >
             <span class="material-symbols-outlined"> mobile_off </span>
@@ -52,6 +53,17 @@
           </div>
           <div
             class="col-md-1 forum-info"
+            v-if="rol == 'moderador' || rol == 'admin' || rol == 'superadmin'"
+            v-on:click="reportarForo(foro.autor_id, foro.foro_id)"
+          >
+            <span class="material-symbols-outlined"> warning </span>
+            <div>
+              <small>Reportar</small>
+            </div>
+          </div>
+          <div
+            class="col-lg forum-info"
+            v-if="rol != 'moderador' && rol != 'admin' && rol != 'superadmin'"
             v-on:click="reportarForo(foro.autor_id, foro.foro_id)"
           >
             <span class="material-symbols-outlined"> warning </span>
@@ -61,6 +73,7 @@
           </div>
           <div
             class="col-md-1 forum-info"
+            v-if="rol == 'moderador' || rol == 'admin' || rol == 'superadmin'"
             v-on:click="eliminarForo(foro.foro_id)"
           >
             <span class="material-symbols-outlined"> delete </span>
@@ -168,6 +181,7 @@ export default {
       reglas: [],
       foros: [],
       param: "",
+      rol: this.$store.getters.getUserRol,
       URL_BUSCAR: "http://localhost:3000/api/foros/buscar/",
       URL_CREAR: "http://localhost:3000/api/foros/crear",
       URL: "http://localhost:3000/api/foros/",

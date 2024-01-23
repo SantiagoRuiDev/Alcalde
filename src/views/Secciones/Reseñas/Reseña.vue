@@ -221,11 +221,16 @@ export default {
       });
 
       // Calcular promedio
-      this.calificaciones.gasolina = Math.min(5, gasolina / x.length);
-      this.calificaciones.confiabilidad = Math.min(5, confiabilidad / x.length);
-      this.calificaciones.confort = Math.min(5, confort / x.length);
-      this.calificaciones.diseno = Math.min(5, diseno / x.length);
-      this.calificaciones.manejo = Math.min(5, manejo / x.length);
+
+      this.calificaciones.gasolina = Math.min(5, gasolina / x.length)
+      this.calificaciones.confiabilidad = Math.min(
+        5,
+        confiabilidad / x.length
+      )
+      this.calificaciones.confort = Math.min(5, confort / x.length)
+      this.calificaciones.diseno = Math.min(5, diseno / x.length)
+      this.calificaciones.manejo = Math.min(5, manejo / x.length)
+
 
       this.calificaciones.total =
         this.calificaciones.gasolina +
@@ -234,7 +239,16 @@ export default {
         this.calificaciones.diseno +
         this.calificaciones.manejo;
 
-      this.calificaciones.total = Math.min(5, this.calificaciones.total / 5);
+      this.calificaciones.total = Math.min(5, this.calificaciones.total / 5).toFixed(2);
+
+      // Redondear a 2 decimales
+      this.calificaciones.gasolina = this.calificaciones.gasolina.toFixed(2);
+      this.calificaciones.confiabilidad = this.calificaciones.confiabilidad.toFixed(
+        2
+      );
+      this.calificaciones.confort = this.calificaciones.confort.toFixed(2);
+      this.calificaciones.diseno = this.calificaciones.diseno.toFixed(2);
+      this.calificaciones.manejo = this.calificaciones.manejo.toFixed(2);
     },
 
     deleteMessage(id) {
@@ -1764,7 +1778,7 @@ export default {
       </div>
 
       <div class="comentarios mt-5" v-if="subforoSelected != -1">
-        <div class="d-grid justify-content-center mx-auto gap-3 mb-5">
+        <div class="d-grid justify-content-center mx-auto gap-3 mb-5" v-if="rol == 'moderador' || rol == 'admin' || rol == 'superadmin'">
           <span class="material-symbols-outlined fs-1 text-center">
             volume_mute
           </span>

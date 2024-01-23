@@ -173,6 +173,7 @@ export default {
 
           this.versus = response.data.versus;
           this.comentarios = response.data.comentarios;
+          console.log(this.versus)
         })
         .catch((error) => {
           console.log(error);
@@ -212,6 +213,7 @@ export default {
               confirmButtonText: "Aceptar",
             });
           }
+          location.reload();
         })
         .catch((error) => {
           this.$swal.fire({

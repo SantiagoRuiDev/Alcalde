@@ -51,21 +51,21 @@ export default {
       // Filtrar por altura del piso
       if(this.filtros.altura_piso != ""){
         resenas = resenas.filter(resena => {
-          return resena.chasis[0].altura_piso == this.filtros.altura_piso;
+          return resena.chasis[0].altura_piso <= this.filtros.altura_piso;
         });
       }
 
       // Filtrar por ancho
       if(this.filtros.ancho != ""){
         resenas = resenas.filter(resena => {
-          return resena.chasis[0].ancho == this.filtros.ancho;
+          return resena.chasis[0].ancho <= this.filtros.ancho;
         });
       }
 
       // Filtrar por largo
       if(this.filtros.largo != ""){
         resenas = resenas.filter(resena => {
-          return resena.chasis[0].largo == this.filtros.largo;
+          return resena.chasis[0].largo <= this.filtros.largo;
         });
       }
 
@@ -94,6 +94,7 @@ export default {
           this.rawDetalles = response.data.resenas[1];
           this.rawChasis = response.data.resenas[2];
 
+          console.log(response.data)
           if(this.token){
             this.preferencias = response.data.userPreferences[0].etiquetas;
           }
@@ -184,6 +185,8 @@ export default {
 
       // Crear arreglo de reseñas con preferencias
       if(!this.token) return;
+
+      if(this.preferencias == "") return;
 
       let resenasSugeridas = [];
 
@@ -319,7 +322,7 @@ export default {
   </div>
 
 
-  <div class="d-flex flex-column mx-auto mb-5" style="width: 80%;" v-if="token">
+  <div class="d-flex flex-column mx-auto mb-5" style="width: 80%;" v-if="token && preferencias != ''">
     <h1 class="fs-1">Sugeridos para ti</h1>
     <small class="fs-6">Tus etiquetas preferidas son {{ preferencias }}</small>
   </div>
