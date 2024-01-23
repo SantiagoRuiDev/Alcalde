@@ -308,7 +308,7 @@ export default {
         <option value="Carga">Carga</option>
         <option value="Economico">Economico</option>
         <option value="Rendidor">Rendidor</option>
-        <option value="4x4">4x4</option>
+        <option value="Cuatro">4x4</option>
         <option value="Estudiantes">Estudiantes</option>
         <option value="Pickup">Pickup</option>
       </select>

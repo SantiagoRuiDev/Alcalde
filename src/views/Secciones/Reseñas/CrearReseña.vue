@@ -861,7 +861,7 @@ export default {
                   <label class="form-check-label" for="Rendidor"> Rendidor </label>
                 </div>
                 <div class="form-check">
-                  <input class="form-check-input" type="checkbox" value="4x4" id="4x4"  v-model="etiquetas.cuatro"/>
+                  <input class="form-check-input" type="checkbox" value="Cuatro" id="4x4"  v-model="etiquetas.cuatro"/>
                   <label class="form-check-label" for="4x4"> 4x4 </label>
                 </div>
                 <div class="form-check">
