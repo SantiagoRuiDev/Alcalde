@@ -44,7 +44,7 @@ export default {
       // Filtrar por precio
       if(this.filtros.precio != ""){
         resenas = resenas.filter(resena => {
-          return resena.detalles[0].precioIni <= this.filtros.precio && resena.detalles[0].precioFin >= this.filtros.precio;
+          return resena.detalles[0].precioIni <= this.filtros.precio;
         });
       }
 
