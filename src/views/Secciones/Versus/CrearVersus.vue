@@ -1,4 +1,6 @@
 <script>
+import * as Tools from '../../../env.js'
+const SERVER = Tools.STATUS ? Tools.API : Tools.DEV;
 export default {
     data() {
         return {
@@ -11,9 +13,9 @@ export default {
             data: new FormData(),
             versus: [],
             versusLista: [],
-            URL_CREAR: "http://localhost:3000/api/versus/crear",
-            URL_BUSCAR: "http://localhost:3000/api/resenas/buscar/",
-            URL_INFO: "http://localhost:3000/api/resenas/info/"
+            URL_CREAR: SERVER + "/api/versus/crear",
+            URL_BUSCAR: SERVER + "/api/resenas/buscar/",
+            URL_INFO: SERVER + "/api/resenas/info/"
         }
     },
 

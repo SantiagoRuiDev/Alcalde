@@ -1,5 +1,6 @@
 <script>
 import Editor from "@tinymce/tinymce-vue";
+import * as Tools from '../../../env.js'
 export default {
   components: {
     editor: Editor,
@@ -10,8 +11,9 @@ export default {
       subtitulo: "",
       contenido: "",
       selectedFile: null,
-      URL: "http://localhost:3000/api/articulos/crear",
-      URL_IMAGE: "http://localhost:3000/api/articulos/image",
+      SERVER: Tools.STATUS ? Tools.API : Tools.DEV,
+      URL: this.SERVER + "/api/articulos/crear",
+      URL_IMAGE: this.SERVER + "/api/articulos/image",
       alertaMessage: "",
       alerta: false,
     };

@@ -1,6 +1,8 @@
 <script>
 import Spinner from "../../components/Spinner.vue";
 import Alerta from "../../components/Alerta.vue";
+import * as Tools from '../../env.js'
+const SERVER = Tools.STATUS ? Tools.API : Tools.DEV;
 export default {
   components: {
     Spinner,
@@ -18,7 +20,7 @@ export default {
       code: "",
       contra: "",
       errorMessage: "",
-      URL: "http://localhost:3000/api/usuario/"
+      URL: SERVER + "/api/usuario/"
     };
   },
   watch: {

@@ -1,10 +1,12 @@
 <script>
+import * as Tools from '../../env.js'
+const SERVER = Tools.STATUS ? Tools.API : Tools.DEV;
 import axios from "axios";
 export default {
   data() {
     return {
       registros: [],
-      URL_REGISTROS: "http://localhost:3000/api/registros",
+      URL_REGISTROS: SERVER + "/api/registros",
     };
   },
   created: function () {

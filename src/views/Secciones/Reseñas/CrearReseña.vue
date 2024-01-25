@@ -1,4 +1,6 @@
 <script>
+import * as Tools from '../../../env.js'
+const SERVER = Tools.STATUS ? Tools.API : Tools.DEV;
 export default {
   data() {
     return {
@@ -15,7 +17,7 @@ export default {
         final: ""
       },
       selectedFile: null,
-      URL: "http://localhost:3000/api/resenas/crear",
+      URL: SERVER + "/api/resenas/crear",
       alertaMessage: "",
       carrete: [],
       id: "",

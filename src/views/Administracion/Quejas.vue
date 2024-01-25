@@ -1,6 +1,8 @@
 <script>
 import Alerta from '../../components/Alerta.vue';
 
+import * as Tools from '../../env.js'
+const SERVER = Tools.STATUS ? Tools.API : Tools.DEV;
 export default {
     components: {
         Alerta
@@ -8,8 +10,8 @@ export default {
     data(){
         return {
             quejas: [],
-            URL: "http://localhost:3000/api/quejas",
-            URL_ELIMINAR: "http://localhost:3000/api/quejas/eliminar/",
+            URL: SERVER + "/api/quejas",
+            URL_ELIMINAR: SERVER + "/api/quejas/eliminar/",
             alertaNoQuejas: false
         }
     },

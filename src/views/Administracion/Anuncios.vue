@@ -36,12 +36,14 @@
 
 
 <script>
+import * as Tools from '../../env.js'
+const SERVER = Tools.STATUS ? Tools.API : Tools.DEV;
 export default {
   data() {
     return {
         titulo: "",
         mensaje: "",
-        URL: "http://localhost:3000/api/comunicados/create",
+        URL: SERVER + "/api/comunicados/create",
         loading: false,
     };
   },

@@ -1,11 +1,13 @@
 <script>
+import * as Tools from '../env.js'
+const SERVER = Tools.STATUS ? Tools.API : Tools.DEV;
 export default {
   data() {
     return {
       comunicados: [],
       loading: true,
       userRol: this.$store.getters.getUserRol,
-      URL: "http://localhost:3000/api/comunicados",
+      URL: SERVER + "/api/comunicados",
     };
   },
 

@@ -50,6 +50,8 @@
 </template>
 
 <script>
+import * as Tools from '../../../env.js'
+const SERVER = Tools.STATUS ? Tools.API : Tools.DEV;
 import Spinner from "../../../components/Spinner.vue";
 export default {
   components: { Spinner },
@@ -57,8 +59,8 @@ export default {
     return {
       lista: [],
       coches: [],
-      URL: "http://localhost:3000/api/listas/ver/",
-      URL_DELETE: "http://localhost:3000/api/listas/eliminar/",
+      URL: SERVER + "/api/listas/ver/",
+      URL_DELETE: SERVER + "/api/listas/eliminar/",
       loading: true,
     };
   },

@@ -1,6 +1,8 @@
 <script>
 import Spinner from '../../components/Spinner.vue';
 import Alerta from '../../components/Alerta.vue'
+import * as Tools from '../../env.js'
+const SERVER = Tools.STATUS ? Tools.API : Tools.DEV;
 export default {
   components: {
     Spinner,
@@ -55,7 +57,7 @@ export default {
       this.mostrarBoton = false;
       this.error = false;
       this.axios
-                  .post("http://localhost:3000/api/usuario/login", data)
+                  .post(SERVER + "/api/usuario/login", data)
                    .then(res => {
                     const data = res.data;
                     this.guardarRol(data.user.rol);

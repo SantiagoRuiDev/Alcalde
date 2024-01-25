@@ -1,5 +1,7 @@
 <script>
 import Spinner from "../../../components/Spinner.vue";
+import * as Tools from '../../../env.js'
+const SERVER = Tools.STATUS ? Tools.API : Tools.DEV;
 export default {
   components: { Spinner },
   data() {
@@ -21,8 +23,8 @@ export default {
         marca: "",
       },
       preferencias: [],
-      URL: "http://localhost:3000/api/resenas/",
-      URL_BUSCAR: "http://localhost:3000/api/resenas/buscar/",
+      URL: SERVER + "/api/resenas/",
+      URL_BUSCAR: SERVER + "/api/resenas/buscar/",
       loading: true,
     };
   },

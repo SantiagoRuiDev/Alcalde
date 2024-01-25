@@ -2,6 +2,8 @@
 import { socket } from "@/socket.js";
 import { state } from "@/socket.js";
 import Slider from "@/components/Slider.vue";
+import * as Tools from '../../../env.js'
+const SERVER = Tools.STATUS ? Tools.API : Tools.DEV;
 export default {
   name: "Resena",
   components: {
@@ -10,13 +12,13 @@ export default {
   data() {
     return {
       resenas: [],
-      URL: "http://localhost:3000/api/resenas/",
-      URL_COMENTAR: "http://localhost:3000/api/resenas/comentario/",
-      URL_SUBFORO: "http://localhost:3000/api/subforo/",
-      URL_CALIFICAR: "http://localhost:3000/api/calificaciones",
-      URL_STRIKES: "http://localhost:3000/api/strikes/sancionar/",
-      URL_REGLAS: "http://localhost:3000/api/foros/regla",
-      URL_LIKEREPLY: "http://localhost:3000/api/subforo/like/reply/",
+      URL: SERVER + "/api/resenas/",
+      URL_COMENTAR: SERVER + "/api/resenas/comentario/",
+      URL_SUBFORO: SERVER + "/api/subforo/",
+      URL_CALIFICAR: SERVER + "/api/calificaciones",
+      URL_STRIKES: SERVER + "/api/strikes/sancionar/",
+      URL_REGLAS: SERVER + "/api/foros/regla",
+      URL_LIKEREPLY: SERVER + "/api/subforo/like/reply/",
       loading: true,
       reglas: [],
       cantidadVotos: 0,

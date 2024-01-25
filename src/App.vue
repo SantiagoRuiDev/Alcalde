@@ -4,6 +4,8 @@ import LoggedBar from "./components/LoggedBar.vue";
 import AdminBar from "./components/AdminBar.vue";
 import Footer from './components/Footer.vue';
 import axios from 'axios';
+import * as Tools from '../../env.js'
+const SERVER = Tools.STATUS ? Tools.API : Tools.DEV;
 export default {
     components: {
         Navbar,
@@ -21,7 +23,7 @@ export default {
     },
     created() {{
             if(this.userToken){
-                const url = 'http://localhost:3000/api/usuario/sesion';
+                const url = SERVER + '/api/usuario/sesion';
                 const headers = { 'x-access-token': this.userToken }
                 axios.post(url, {}, { headers })
                     .then(response => {
@@ -42,7 +44,7 @@ export default {
     methods: {
         isBanned(){
             if(!this.userToken) return;
-            const url = 'http://localhost:3000/api/usuario/banned';
+            const url = SERVER + '/api/usuario/banned';
             const headers = { 'x-access-token': this.userToken }
             axios.get(url, { headers })
                 .then(response => {

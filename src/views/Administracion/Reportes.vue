@@ -1,12 +1,14 @@
 <script>
 import axios from "axios";
+import * as Tools from '../../env.js'
+const SERVER = Tools.STATUS ? Tools.API : Tools.DEV;
 export default {
   data() {
     return {
       reportes: [],
-      URL_STRIKES: "http://localhost:3000/api/strikes/sancionar/",
-      URL_BAN: "http://localhost:3000/api/usuario/ban/",
-      URL_CERRAR: "http://localhost:3000/api/reportes/eliminar/",
+      URL: SERVER + "/api/strikes/sancionar/",
+      URL_BAN: SERVER + "/api/usuario/ban/",
+      URL_CERRAR: SERVER + "/api/reportes/eliminar/",
     };
   },
   created: function () {
@@ -15,7 +17,7 @@ export default {
   methods: {
     getReportes() {
       axios
-        .get("http://localhost:3000/api/reportes", {
+        .get(SERVER + "/api/reportes", {
           headers: {
             "x-access-token": this.$store.getters.getUserToken,
           },
@@ -75,7 +77,7 @@ export default {
         axios
           .post(
             this.URL_BAN + id,
-            {razon: text},
+            { razon: text },
             {
               headers: {
                 "x-access-token": this.$store.getters.getUserToken,

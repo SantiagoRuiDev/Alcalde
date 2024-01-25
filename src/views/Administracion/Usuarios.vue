@@ -1,14 +1,17 @@
 <script>
 import axios from "axios";
+import * as Tools from '../../env.js'
+const SERVER = Tools.STATUS ? Tools.API : Tools.DEV;
 export default {
   data() {
     return {
       usuarios: [],
-      URL_STRIKES: "http://localhost:3000/api/strikes/sancionar/",
-      URL_BAN: "http://localhost:3000/api/usuario/ban/",
-      URL_ASCENDER: "http://localhost:3000/api/usuario/ascender/",
-      URL_DEGRADAR: "http://localhost:3000/api/usuario/degradar/",
-      URL_PERDONAR: "http://localhost:3000/api/usuario/pardon/",
+      SERVER: Tools.STATUS ? Tools.API : Tools.DEV,
+      URL_STRIKES: SERVER + "/api/strikes/sancionar/",
+      URL_BAN:  SERVER + "/api/usuario/ban/",
+      URL_ASCENDER:  SERVER + "/api/usuario/ascender/",
+      URL_DEGRADAR:  SERVER + "/api/usuario/degradar/",
+      URL_PERDONAR:  SERVER + "/api/usuario/pardon/",
     };
   },
   created: function () {
@@ -17,7 +20,7 @@ export default {
   methods: {
     getUsuarios() {
       axios
-        .get("http://localhost:3000/api/usuario", {
+        .get( SERVER + "/api/usuario", {
           headers: {
             "x-access-token": this.$store.getters.getUserToken,
           },

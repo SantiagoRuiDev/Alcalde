@@ -82,6 +82,8 @@
 </template>
 
 <script>
+import * as Tools from '../../../env.js'
+const SERVER = Tools.STATUS ? Tools.API : Tools.DEV;
 export default {
   data() {
     return {
@@ -90,10 +92,10 @@ export default {
       reglas: [],
       palabras: "",
       list: [],
-      URL: "http://localhost:3000/api/foros/regla/crear",
-      URL_ELIMINAR: "http://localhost:3000/api/foros/regla/eliminar/",
-      URL_VER: "http://localhost:3000/api/foros/regla",
-      PALABRAS: "http://localhost:3000/api/foros/palabras",
+      URL: SERVER + "/api/foros/regla/crear",
+      URL_ELIMINAR: SERVER + "/api/foros/regla/eliminar/",
+      URL_VER: SERVER + "/api/foros/regla",
+      PALABRAS: SERVER + "/api/foros/palabras",
       loading: false,
     };
   },

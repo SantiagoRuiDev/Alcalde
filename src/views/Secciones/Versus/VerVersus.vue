@@ -1,4 +1,6 @@
 <script>
+import * as Tools from '../../../env.js'
+const SERVER = Tools.STATUS ? Tools.API : Tools.DEV;
 import Spinner from "../../../components/Spinner.vue";
 export default {
   components: { Spinner },
@@ -11,12 +13,12 @@ export default {
       comentarios: [],
       text: "",
       imagen: null,
-      URL: "http://localhost:3000/api/versus/",
-      URL_COMENTAR: "http://localhost:3000/api/versus/comentario/",
-      URL_ELIMINAR: "http://localhost:3000/api/versus/eliminar/comentario/",
-      URL_VOTE: "http://localhost:3000/api/versus/votar/",
-      URL_SEE: "http://localhost:3000/api/versus/votos/",
-      URL_STRIKES: "http://localhost:3000/api/strikes/sancionar/",
+      URL: SERVER + "/api/versus/",
+      URL_COMENTAR: SERVER + "/api/versus/comentario/",
+      URL_ELIMINAR: SERVER + "/api/versus/eliminar/comentario/",
+      URL_VOTE: SERVER + "/api/versus/votar/",
+      URL_SEE: SERVER + "/api/versus/votos/",
+      URL_STRIKES: SERVER + "/api/strikes/sancionar/",
     };
   },
   created: function () {

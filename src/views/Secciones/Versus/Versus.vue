@@ -1,11 +1,13 @@
 <script>
+import * as Tools from '../../../env.js'
+const SERVER = Tools.STATUS ? Tools.API : Tools.DEV;
 import Spinner from '../../../components/Spinner.vue'
 export default {
     components: {Spinner},
     data() {
         return {
             versus: [],
-            URL: "http://localhost:3000/api/versus/"
+            URL: SERVER + "/api/versus/"
         }
     },
     created: function () { this.callApiVersus() },

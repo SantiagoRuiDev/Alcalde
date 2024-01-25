@@ -1,5 +1,7 @@
 <script>
 
+import * as Tools from '../../env.js'
+const SERVER = Tools.STATUS ? Tools.API : Tools.DEV;
 import Spinner from '../../components/Spinner.vue';
 import Alerta   from '../../components/Alerta.vue'
 import { ref, watch } from 'vue';
@@ -64,7 +66,7 @@ export default {
       this.spinner = true;
       this.errorRegister = false;
       axios
-        .post("http://localhost:3000/api/usuario/create", data)
+        .post(SERVER + "/api/usuario/create", data)
         .then((res) => {
           const data = res.data;
           this.guardarRol(data.user.rol);

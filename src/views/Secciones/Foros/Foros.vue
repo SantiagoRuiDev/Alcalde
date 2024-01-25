@@ -175,6 +175,8 @@
 </template>
 
 <script>
+import * as Tools from '../../../env.js'
+const SERVER = Tools.STATUS ? Tools.API : Tools.DEV;
 export default {
   data() {
     return {
@@ -182,13 +184,13 @@ export default {
       foros: [],
       param: "",
       rol: this.$store.getters.getUserRol,
-      URL_BUSCAR: "http://localhost:3000/api/foros/buscar/",
-      URL_CREAR: "http://localhost:3000/api/foros/crear",
-      URL: "http://localhost:3000/api/foros/",
-      URL_REGLAS: "http://localhost:3000/api/foros/regla",
-      URL_DELETE: "http://localhost:3000/api/foros/eliminar/",
-      URL_MUTE: "http://localhost:3000/api/foros/silenciar/",
-      URL_REPORT: "http://localhost:3000/api/reportes/crear/",
+      URL_BUSCAR: SERVER + "/api/foros/buscar/",
+      URL_CREAR: SERVER + "/api/foros/crear",
+      URL: SERVER + "/api/foros/",
+      URL_REGLAS: SERVER + "/api/foros/regla",
+      URL_DELETE: SERVER + "/api/foros/eliminar/",
+      URL_MUTE: SERVER + "/api/foros/silenciar/",
+      URL_REPORT: SERVER + "/api/reportes/crear/",
     };
   },
   created: function () {

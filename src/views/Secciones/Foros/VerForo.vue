@@ -270,6 +270,8 @@
 </style>
 
 <script>
+import * as Tools from '../../../env.js'
+const SERVER = Tools.STATUS ? Tools.API : Tools.DEV;
 import { socket } from "@/socket.js";
 import { state } from "@/socket.js";
 export default {
@@ -286,14 +288,14 @@ export default {
       likes: [],
       likesReply: [],
       savedFile: { filename: "", path: "" },
-      URL_STRIKES: "http://localhost:3000/api/strikes/sancionar/",
-      URL_SUBIR: "http://localhost:3000/api/chat/upload",
-      URL_CREAR: "http://localhost:3000/api/foros/crear/mensaje/",
-      URL_REPLY: "http://localhost:3000/api/foros/crear/reply/",
-      URL_LIKE: "http://localhost:3000/api/foros/crear/like/",
-      URL_LIKEREPLY: "http://localhost:3000/api/foros/crear/like/reply/",
-      URL_ELIMINAR: "http://localhost:3000/api/foros/delete/mensaje/",
-      URL_ELIMINAR_REPLY: "http://localhost:3000/api/foros/delete/reply/",
+      URL_STRIKES: SERVER + "/api/strikes/sancionar/",
+      URL_SUBIR: SERVER + "/api/chat/upload",
+      URL_CREAR: SERVER + "/api/foros/crear/mensaje/",
+      URL_REPLY: SERVER + "/api/foros/crear/reply/",
+      URL_LIKE: SERVER + "/api/foros/crear/like/",
+      URL_LIKEREPLY: SERVER + "/api/foros/crear/like/reply/",
+      URL_ELIMINAR: SERVER + "/api/foros/delete/mensaje/",
+      URL_ELIMINAR_REPLY: SERVER + "/api/foros/delete/reply/",
     };
   },
   created: async function () {

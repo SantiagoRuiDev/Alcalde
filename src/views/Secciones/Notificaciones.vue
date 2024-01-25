@@ -39,12 +39,14 @@
 </template>
 
 <script>
+import * as Tools from '../../env.js'
+const SERVER = Tools.STATUS ? Tools.API : Tools.DEV;
 export default {
   data() {
     return {
       notificaciones: [],
-      URL: "http://localhost:3000/api/notificaciones",
-      URL_DELETE: "http://localhost:3000/api/notificaciones/eliminar/",
+      URL: SERVER + "/api/notificaciones",
+      URL_DELETE: SERVER + "/api/notificaciones/eliminar/",
     };
   },
   created: function () {

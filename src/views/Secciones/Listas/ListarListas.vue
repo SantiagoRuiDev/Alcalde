@@ -1,12 +1,14 @@
 <script>
+import * as Tools from '../../../env.js'
+const SERVER = Tools.STATUS ? Tools.API : Tools.DEV;
 import Spinner from "../../../components/Spinner.vue";
 export default {
   components: { Spinner },
   data() {
     return {
       listas: [],
-      URL: "http://localhost:3000/api/listas/ver",
-      URL_BUSCAR: "http://localhost:3000/api/listas/buscar/",
+      URL: SERVER + "/api/listas/ver",
+      URL_BUSCAR: SERVER + "/api/listas/buscar/",
       loading: false,
       param: "",
     };
