@@ -58,15 +58,15 @@
 <script>
 import Spinner from "../../../components/Spinner.vue";
 import * as Tools from '../../../env.js'
+const SERVER = Tools.STATUS ? Tools.API : Tools.DEV;
 export default {
   components: { Spinner },
   data() {
     return {
       articulo: [],
-      SERVER: Tools.STATUS ? Tools.API : Tools.DEV,
-      URL: this.SERVER + "/api/articulos/",
-      URL_DELETE: this.SERVER + "/api/articulos/eliminar/",
-      URL_REPORT: this.SERVER + "/api/reportes/crear/",
+      URL: SERVER + "/api/articulos/",
+      URL_DELETE: SERVER + "/api/articulos/eliminar/",
+      URL_REPORT: SERVER + "/api/reportes/crear/",
       loading: true,
     };
   },
