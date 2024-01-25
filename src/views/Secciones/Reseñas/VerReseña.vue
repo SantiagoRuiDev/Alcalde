@@ -290,7 +290,7 @@ export default {
         />
       </div>
       <div class="input-group-text d-flex gap-3">
-        <label for="filtro">Filtrar por Precio</label>
+        <label for="filtro">Filtrar por Precio Máximo</label>
         <input
           class="form-control input mt-0"
           type="number"
@@ -316,7 +316,7 @@ export default {
       </select>
       </div>
       <div class="input-group-text d-flex gap-3">
-        <label for="filtro">Filtrar por Altura del Piso</label>
+        <label for="filtro">Filtrar por Altura del Piso Máxima (mm)</label>
         <input
           class="form-control input mt-0"
           type="number"
@@ -325,7 +325,7 @@ export default {
         />
       </div>
       <div class="input-group-text d-flex gap-3">
-        <label for="filtro">Filtrar por Ancho</label>
+        <label for="filtro">Filtrar por Ancho Máximo (mm)</label>
         <input
           class="form-control input mt-0"
           type="number"
@@ -334,7 +334,7 @@ export default {
         />
       </div>
       <div class="input-group-text d-flex gap-3">
-        <label for="filtro">Filtrar por Largo</label>
+        <label for="filtro">Filtrar por Largo Máximo (mm)</label>
         <input
           class="form-control input mt-0"
           type="number"
