@@ -138,7 +138,7 @@ export default {
               <label for="contenido">Redacta el contenido</label>
               <editor
                 v-model="contenido"
-                api-key="4sy281yb48j3w5jel1fikdndfns9nmj1t7xjd76yyf6ok452"
+                api-key="cya6cdedktbgwzbmmqgw426l0d0kwbeuddbwe5egft6hshlt"
                 :init="{
                   menubar: false,
                   language: 'es_MX',
