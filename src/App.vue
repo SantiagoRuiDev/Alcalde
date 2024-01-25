@@ -4,7 +4,7 @@ import LoggedBar from "./components/LoggedBar.vue";
 import AdminBar from "./components/AdminBar.vue";
 import Footer from './components/Footer.vue';
 import axios from 'axios';
-import * as Tools from '../../env.js'
+import * as Tools from './env.js'
 const SERVER = Tools.STATUS ? Tools.API : Tools.DEV;
 export default {
     components: {
